@@ -72,20 +72,6 @@ Rtorrent.prototype.getMulticall = function(method, param, cmds, callback) {
     });
 };
 
-Rtorrent.prototype.getAll = function(callback) {
-    var self = this;
-
-    self.getGlobals(function (err, globals) {
-        if (err) return callback(err);
-
-        self.getTorrents(function (err, torrents) {
-            if (err) return callback(err);
-
-                callback(err, torrents)
-        });
-    });
-};
-
 Rtorrent.prototype.getTorrents = function(callback) {
     var self = this;
 
@@ -133,10 +119,6 @@ Rtorrent.prototype.systemMulticall = function(cmds, callback) {
     });
 };
 
-Rtorrent.prototype.getGlobals = function(callback) {
-   this.systemMulticall(fields.global, callback);
-};
-
 Rtorrent.prototype.start = function(hash, callback) {
     var self = this;
     this.get('d.open', [hash], function(err, data) {
@@ -179,84 +161,19 @@ Rtorrent.prototype.setPath = function(hash, directory, callback) {
 module.exports = Rtorrent;
 
 var fields = {
-    global: {
-        up_rate: 'get_up_rate',
-        down_rate: 'get_down_rate',
-        up_total: 'get_up_total',
-        down_total: 'get_down_total',
-        bind: 'get_bind',
-        check_hash: 'get_check_hash',
-        dht_port: 'get_dht_port',
-        directory: 'get_directory',
-        download_rate: 'get_download_rate',
-        http_cacert: 'get_http_cacert',
-        http_capath: 'get_http_capath',
-        http_proxy: 'get_http_proxy',
-        ip: 'get_ip',
-        max_downloads_div: 'get_max_downloads_div',
-        max_downloads_global: 'get_max_downloads_global',
-        max_file_size: 'get_max_file_size',
-        max_memory_usage: 'get_max_memory_usage',
-        max_open_files: 'get_max_open_files',
-        max_open_http: 'get_max_open_http',
-        max_peers: 'get_max_peers',
-        max_peers_seed: 'get_max_peers_seed',
-        max_uploads: 'get_max_uploads',
-        max_uploads_global: 'get_max_uploads_global',
-        min_peers_seed: 'get_min_peers_seed',
-        min_peers: 'get_min_peers',
-        peer_exchange: 'get_peer_exchange',
-        port_open: 'get_port_open',
-        upload_rate: 'get_upload_rate',
-        port_random: 'get_port_random',
-        port_range: 'get_port_range',
-        preload_min_size: 'get_preload_min_size',
-        preload_required_rate: 'get_preload_required_rate',
-        preload_type: 'get_preload_type',
-        proxy_address: 'get_proxy_address',
-        receive_buffer_size: 'get_receive_buffer_size',
-        safe_sync: 'get_safe_sync',
-        scgi_dont_route: 'get_scgi_dont_route',
-        send_buffer_size: 'get_send_buffer_size',
-        session: 'get_session',
-        session_lock: 'get_session_lock',
-        session_on_completion: 'get_session_on_completion',
-        split_file_size: 'get_split_file_size',
-        split_suffix: 'get_split_suffix',
-        timeout_safe_sync: 'get_timeout_safe_sync',
-        timeout_sync: 'get_timeout_sync',
-        tracker_numwant: 'get_tracker_numwant',
-        use_udp_trackers: 'get_use_udp_trackers',
-        max_uploads_div: 'get_max_uploads_div',
-        max_open_sockets: 'get_max_open_sockets'
-    },
     torrents: {
         hash: 'd.get_hash',
         torrent: 'd.get_tied_to_file',
-//        torrentsession: 'd.get_loaded_file',
         path: 'd.get_base_path',
         name: 'd.get_base_filename',
 	label: 'd.custom1',
         size: 'd.get_size_bytes',
-//        skip: 'd.get_skip_total',
-//        completed: 'd.get_completed_bytes',
-//        down_rate: 'd.get_down_rate',
-//        down_total: 'd.get_down_total',
-//        up_rate: 'd.get_up_rate',
-//        up_total: 'd.get_up_total',
         message: 'd.get_message',
-//        bitfield: 'd.get_bitfield',
-//        chunk_size: 'd.get_chunk_size',
-//        chunk_completed: 'd.get_completed_chunks',
         createdAt: 'd.creation_date',
         active: 'd.is_active',
         open: 'd.is_open',
         complete: 'd.get_complete',
-//        hashing: 'd.is_hash_checking',
-//        hashed: 'd.is_hash_checked',
-//        leechers: 'd.get_peers_accounted',
-        seeders: 'd.get_peers_complete',
-//        free_disk_space: 'd.free_diskspace'
+        seeders: 'd.get_peers_complete'
     },
 };
 
