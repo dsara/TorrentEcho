@@ -24,12 +24,12 @@ var ftps = new FTPS({
   additionalLftpCommands: pgetCommand
 });
 
-function RTorrentSync() {
+function Sync() {
   // TODO: Anything that should be here?
 };
 
 
-RTorrentSync.prototype.sync = function(callback) {
+Sync.prototype.sync = function(callback) {
 
   var label = "Games";
 
@@ -51,4 +51,4 @@ RTorrentSync.prototype.sync = function(callback) {
   });
 };
 
-module.exports = RTorrentSync;
+module.exports = Sync;

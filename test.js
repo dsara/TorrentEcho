@@ -1,3 +1,5 @@
-var torrentSync = require('./rtorrentsync.js');
+var torrentSync = require('./sync.js');
 
-torrentSync.sync(console.log);
+var syncer = new torrentSync();
+
+syncer.sync(console.log);
