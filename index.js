@@ -15,7 +15,13 @@ function Sync(config) {
         isSecure: config.isSecure
     });
     
-    var pgetCommand = "set mirror:use-pget-n " + config.pget + "; set pget:default-n " + config.pget;
+    var pgetCommand = "set mirror:use-pget-n " + config.pget + ";set pget:default-n " + config.pget;
+    var tempCommand = "set xfer:use-temp-file true;set xfer:temp-file-name *.tmp";
+    
+    additionalCommands = pgetCommand;
+    
+    if (config.useTemp)
+        additionalCommands += ";" + tempCommand;
     
     self.ftps = new FTPS({
         host: config.host,
@@ -23,7 +29,7 @@ function Sync(config) {
         password: config.pass,
         protocol: 'sftp',
         autoConfirm: true,
-        additionalLftpCommands: pgetCommand
+        additionalLftpCommands: additionalCommands
     });
 };
 
@@ -49,7 +55,7 @@ Sync.prototype.sync = function (label, location, callback) {
             console.log("Testing lftp");
             
             // Mirror it for now, need to adjust so we detect if it is a directory or a single file.
-            self.ftps.mirror(item.path, location).exec(console.log);
+            self.ftps.pget(item.path, location).exec(console.log);
         });
 
         console.log("Done");
