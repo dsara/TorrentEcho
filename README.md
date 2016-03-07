@@ -1,2 +1,2 @@
 # RTorrentEcho
-Node JS tool to ficilitate automatic downloading of labelled torrents from an rutorrent file.
+Node JS tool to facilitate automatic downloading of labeled torrents from rutorrent.
