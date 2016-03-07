@@ -45,7 +45,7 @@ Sync.prototype.sync = function (label, location, callback) {
         var torrents = data.filter(function (obj) {
             return obj.label === label;
         });
-
+        
         console.log(torrents.length + " torrents with label " + label);
         
         // Loop over each and download
@@ -57,7 +57,7 @@ Sync.prototype.sync = function (label, location, callback) {
             // Mirror it for now, need to adjust so we detect if it is a directory or a single file.
             self.ftps.pget(item.path, location).exec(console.log);
         });
-
+        
         console.log("Done");
     });
 };
