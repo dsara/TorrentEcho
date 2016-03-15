@@ -52,9 +52,7 @@ Sync.prototype.sync = function (label, location, callback) {
 
         // Loop over each and add commands to queue them
         torrents.forEach(function (item) {
-            console.log(item.name + " found\n" + item.path);
-
-            console.log("Downloading with lftp");
+            console.log("Adding" + item.name + " to download");
 
             // Check if the torrent is a multi file, if it is use mirror.
             if (item.ismultifile == true){
