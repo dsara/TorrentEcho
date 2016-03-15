@@ -43,10 +43,17 @@ Sync.prototype.sync = function (label, location, callback) {
 
         // filter down to torrents with the label and are complete
         var torrents = data.filter(function (obj) {
-            return obj.label === label && obj.complete == 1;
+            return obj.label === label;
         });
 
+        var completeTorrents = torrents.filter(function(obj)){
+          return obj.complete == 1;
+        }
+
         // TODO: Handle torrents that are not complete, by waiting and watching for them to complete
+        var incompleteTorrents = torrents.filter(function(obj)){
+          return obj.complete == 0;
+        }
 
         console.log(torrents.length + " torrents with label " + label);
 
