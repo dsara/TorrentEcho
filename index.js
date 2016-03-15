@@ -50,7 +50,7 @@ Sync.prototype.sync = function (label, location, callback) {
 
         console.log(torrents.length + " torrents with label " + label);
 
-        // Loop over each and download
+        // Loop over each and add commands to queue them
         torrents.forEach(function (item) {
             console.log(item.name + " found\n" + item.path);
 
@@ -58,12 +58,15 @@ Sync.prototype.sync = function (label, location, callback) {
 
             // Check if the torrent is a multi file, if it is use mirror.
             if (item.ismultifile == true){
-              self.ftps.mirror(item.path, location).exec(console.log);
+              self.ftps.mirror(item.path, location);
             }
             else { // Otherwise use pget
-              self.ftps.pget(item.path, location).exec(console.log);
+              self.ftps.queuepget(item.path, location);
             }
         });
+
+        // Finally execute the commands
+        self.ftps.exec(callback);
 
         console.log("Done");
     });
