@@ -45,13 +45,13 @@ Sync.prototype.sync = function(label, location, callback) {
       return obj.label === label;
     });
 
-    console.log(torrents.length + " torrents with label " + label);
+    WriteMessage(torrents.length + " torrents with label " + label, callback);
 
     // Loop over each torrent and add commands to queue them
     torrents.forEach(function(item) {
 
       if (item.complete == 1) {
-        console.log("Adding" + item.name + " to download");
+        WriteMessage("Adding " + item.name + " to download", callback);
 
         // Check if the torrent is a multi file, if it is use mirror.
         if (item.ismultifile == true) {
@@ -65,10 +65,23 @@ Sync.prototype.sync = function(label, location, callback) {
     });
 
     // Finally execute the commands
-    self.ftps.exec(callback);
+    self.ftps.exec(function(err, data) {
+      if (err) {
+        WriteMessage(err + " " + data);
+      } else {
+        WriteMessage(data);
+      }
+    });
 
-    console.log("Done");
+    WriteMessage("Done", callback, true);
   });
 };
+
+function WriteMessage(message, callback, isEnd) {
+  console.log(message);
+  if (callback) {
+    callback(message, isEnd);
+  }
+}
 
 module.exports = Sync;

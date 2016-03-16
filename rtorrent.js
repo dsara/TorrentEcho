@@ -6,7 +6,7 @@ function Rtorrent(option) {
   this.mode = (option && option['mode']) || "xmlrpc";
   this.host = (option && option['host']) || "127.0.0.1";
   this.port = (option && option['port']) || 80;
-  this.path = (option && option['path']) || C"/RPC2";
+  this.path = (option && option['path']) || "/RPC2";
   this.user = (option && option['user']) || null;
   this.pass = (option && option['pass']) || null;
   this.isSecure = (option && option['isSecure']) || false;

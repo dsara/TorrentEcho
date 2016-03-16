@@ -5,7 +5,6 @@
   "description": "Provide automated downloads from rtorrent client with lftp",
   "main": "index.js",
   "scripts": {
-    "test": "test.js"
   },
   "repository": {
     "type": "git",

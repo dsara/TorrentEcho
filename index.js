@@ -30,21 +30,24 @@ server.listen(PORT, function() {
 dispatcher.setStatic('resources');
 
 dispatcher.onGet("/download/tv", function(req, res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/plain'
+  });
 
   try {
     var syncer = new sync(config);
 
-    var callback = function(err, data) {
-      if (err) console.log(err);
-      console.log(data);
+    var callback = function(message, end) {
+      if (end) {
+        res.end(message);
+      } else {
+        res.write(message + " \n");
+      }
     }
 
     syncer.sync('test', "test/", callback);
 
   } catch (err) {
-    res.writeHead(200, {
-      'Content-Type': 'text/plain'
-    });
-    res.end("Download TV Shows");
+    res.end(err);
   }
 });
