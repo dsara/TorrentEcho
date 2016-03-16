@@ -46,29 +46,27 @@ Sync.prototype.sync = function (label, location, callback) {
             return obj.label === label;
         });
 
-        var completeTorrents = torrents.filter(function(obj)){
-          return obj.complete == 1;
-        }
-
-        // TODO: Handle torrents that are not complete, by waiting and watching for them to complete
-        var incompleteTorrents = torrents.filter(function(obj)){
-          return obj.complete == 0;
-        }
-
         console.log(torrents.length + " torrents with label " + label);
 
-        // Loop over each and add commands to queue them
+        // Loop over each torrent and add commands to queue them
         torrents.forEach(function (item) {
-            console.log("Adding" + item.name + " to download");
 
-            // Check if the torrent is a multi file, if it is use mirror.
-            if (item.ismultifile == true){
-              self.ftps.mirror(item.path, location);
+            if (item.complete == 1)
+            {
+              console.log("Adding" + item.name + " to download");
+
+              // Check if the torrent is a multi file, if it is use mirror.
+              if (item.ismultifile == true){
+                self.ftps.mirror(item.path, location);
+              }
+              else { // Otherwise use pget
+                self.ftps.queuepget(item.path, location);
+              }
             }
-            else { // Otherwise use pget
-              self.ftps.queuepget(item.path, location);
+            else {
+              // TODO: Add a watcher then try downloading the torrent.
             }
-        });
+          });
 
         // Finally execute the commands
         self.ftps.exec(callback);
