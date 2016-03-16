@@ -1,0 +1,11 @@
+{
+  "mode": "xmlrpc", // Mode for rtorrent to use... only supports xmlrpc. This is optional
+  "host": "", // rtorrent and lftp host name
+  "port": 80, // rtorrent port
+  "path": "/RPC1", // endpoint for rtorrent rpc
+  "user": "username", // rtorrent and lftp username
+  "pass": "pass", // rtorrent and lftp password
+  "isSecure": false, // whether to use secure xmlrpc client
+  "pget": 5, // number of parallel segments to use when downloading file
+  "useTemp": true // tells lftp to use temp files when downloading
+}
