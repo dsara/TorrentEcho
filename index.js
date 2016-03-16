@@ -1,78 +1,47 @@
-var FTPS = require('./lftp.js');
-var Rtorrent = require('./rtorrent.js');
+var http = require('http');
+var dispatcher = require('httpdispatcher');
+var sync = require('./sync.js');
+var config = require('./config.json');
 
-function Sync(config) {
-    self = this;
+// TODO: Move to config
+const PORT=8080;
 
-    // Setup based on config
-    self.rtorrent = new Rtorrent({
-        mode: config.mode,
-        host: config.host,
-        port: config.port,
-        path: config.path,
-        user: config.user,
-        pass: config.pass,
-        isSecure: config.isSecure
-    });
+//We need a function which handles requests and send response
+function handleRequest(request, response){
+  try {
+      //log the request on console
+      console.log(request.url);
+      //Disptach
+      dispatcher.dispatch(request, response);
+  } catch(err) {
+      console.log(err);
+  }
+}
 
-    var pgetCommand = "set mirror:use-pget-n " + config.pget + ";set pget:default-n " + config.pget;
-    var tempCommand = "set xfer:use-temp-file true;set xfer:temp-file-name *.tmp";
+//Create a server
+var server = http.createServer(handleRequest);
 
-    additionalCommands = pgetCommand;
+//Lets start our server
+server.listen(PORT, function(){
+    //Callback triggered when server is successfully listening. Hurray!
+    console.log("Server listening on: http://localhost:%s", PORT);
+});
 
-    if (config.useTemp)
-        additionalCommands += ";" + tempCommand;
+dispatcher.setStatic('resources');
 
-    self.ftps = new FTPS({
-        host: config.host,
-        username: config.user,
-        password: config.pass,
-        protocol: 'sftp',
-        autoConfirm: true,
-        additionalLftpCommands: additionalCommands
-    });
-};
+dispatcher.onGet("/download/tv", function(req, res){
 
+try {
+  var syncer = new sync(config);
 
-Sync.prototype.sync = function (label, location, callback) {
+  var callback = function(err, data){
+    if (err) console.log(err);
+    console.log(data);
+  }
 
-    console.log("Getting Torrents");
-
-    self.rtorrent.getTorrents(function (err, data) {
-        if (err) return console.log('err: ', err);
-
-        // filter down to torrents with the label and are complete
-        var torrents = data.filter(function (obj) {
-            return obj.label === label;
-        });
-
-        console.log(torrents.length + " torrents with label " + label);
-
-        // Loop over each torrent and add commands to queue them
-        torrents.forEach(function (item) {
-
-            if (item.complete == 1)
-            {
-              console.log("Adding" + item.name + " to download");
-
-              // Check if the torrent is a multi file, if it is use mirror.
-              if (item.ismultifile == true){
-                self.ftps.mirror(item.path, location);
-              }
-              else { // Otherwise use pget
-                self.ftps.queuepget(item.path, location);
-              }
-            }
-            else {
-              // TODO: Add a watcher then try downloading the torrent.
-            }
-          });
-
-        // Finally execute the commands
-        self.ftps.exec(callback);
-
-        console.log("Done");
-    });
-};
-
-module.exports = Sync;
+  syncer.sync('test', "test/", callback);
+} catch(err){
+  res.writeHead(200, {'Content-Type':'text/plain'});
+  res.end("Download TV Shows");
+}
+});
