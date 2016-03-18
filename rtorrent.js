@@ -33,6 +33,8 @@ function Rtorrent(option) {
       }
     }
     if (this.isSecure) {
+      // Tell process to just accept any ssl
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
       this.client = xmlrpc.createSecureClient(options);
     } else {
       this.client = xmlrpc.createClient(options);

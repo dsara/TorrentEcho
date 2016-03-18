@@ -55,7 +55,7 @@ Sync.prototype.sync = function(label, location, callback) {
 
         // Check if the torrent is a multi file, if it is use mirror.
         if (item.ismultifile == true) {
-          self.ftps.mirror(item.path, location);
+          self.ftps.queuemirror(item.path, location);
         } else { // Otherwise use pget
           self.ftps.queuepget(item.path, location);
         }
