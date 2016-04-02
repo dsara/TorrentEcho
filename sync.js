@@ -1,6 +1,8 @@
 var FTPS = require('./lftp.js');
 var Rtorrent = require('./rtorrent.js');
 
+if (!global.torrents) { global.torrents = {}; }
+
 function Sync(config) {
   self = this;
 
@@ -49,20 +51,28 @@ Sync.prototype.sync = function(label, location, callback) {
 
     // Loop over each torrent and add commands to queue them
     torrents.forEach(function(item) {
-
-      if (item.complete == 1) {
-        WriteMessage("Adding " + item.name + " to download", callback);
-
-        // Check if the torrent is a multi file, if it is use mirror.
-        if (item.ismultifile == true) {
-          self.ftps.queuemirror(item.path, location);
-        } else { // Otherwise use pget
-          self.ftps.queuepget(item.path, location);
+      if (item.hash in global.torrents)
+        WriteMessage(item.name + " already being handled by another call. Skipping", callback);
+      else {
+        if (item.complete == 1) {
+          // Set global tag to true, since we are going to try downloading it.
+          global.torrents[item.hash] = true;
+          WriteMessage("Adding " + item.name + " to download", callback);
+          // Check if the torrent is a multi file, if it is use mirror.
+          if (item.ismultifile == true) {
+            self.ftps.mirror(item.path, location);
+          } else { // Otherwise use pget
+            self.ftps.pget(item.path, location);
+          }
+        } else {
+          // Set global flag to false, since we haven't started it yet.
+          global.torrents[item.hash] = false;
+          // TODO: Add a watcher then try downloading the torrent.
         }
-      } else {
-        // TODO: Add a watcher then try downloading the torrent.
       }
     });
+
+    WriteMessage("Starting Download", callback, true);
 
     // Finally execute the commands
     self.ftps.exec(function(err, data) {
@@ -72,16 +82,12 @@ Sync.prototype.sync = function(label, location, callback) {
         WriteMessage(data);
       }
     });
-
-    WriteMessage("Done", callback, true);
   });
 };
 
 function WriteMessage(message, callback, isEnd) {
   console.log(message);
-  if (callback) {
-    callback(message, isEnd);
-  }
+  if (callback) { callback(message, isEnd); }
 }
 
 module.exports = Sync;
