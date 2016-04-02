@@ -8,9 +8,9 @@ var configFile = '/config/config.json';
 try {
   var stats = fs.statSync(configFile);
 }
-catch {
+ catch (e) {
   console.log("config file not found, creating from sample!")
-  fs.createReadStream('./config.json.sample').pipe(fs.createWriteStream(configFile));
+  fs.writeFileSync(configFile, fs.readFileSync('./config.json.sample'));
 }
 
 var config = require(configFile);
