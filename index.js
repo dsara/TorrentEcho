@@ -13,7 +13,9 @@ try {
   fs.writeFileSync(configFile, fs.readFileSync('./config.json.sample'));
 }
 
-var config = require(configFile);
+// Copy the config.json into the src folder, since nodejs doesn't like absolute paths
+fs.writeFileSync('./config.json', fs.readFileSync(configFile));
+var config = require('./config.json');
 
 var app = express();
 
