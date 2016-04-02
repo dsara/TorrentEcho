@@ -36,7 +36,7 @@ app.get("/download/tv", function(req, res) {
       }
     }
 
-    syncer.sync('test', "test/", callback);
+    syncer.sync('test', "download/", callback);
 
   } catch (err) {
     res.end(err);

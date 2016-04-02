@@ -1,7 +1,6 @@
 .git
 .gitignore
 .dockerignore
-config.json.sample
 Dockerfile
 docker-compose.yml
 README.md
