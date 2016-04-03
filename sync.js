@@ -65,8 +65,10 @@ Sync.prototype.sync = function(label, location, callback) {
             self.ftps.pget(item.path, location);
           }
         } else {
-          // Set global flag to false, since we haven't started it yet.
-          global.torrents[item.hash] = false;
+          //// Set global flag to false, since we haven't started it yet.
+          // Commented out so we don't set anything until the watcher is created
+          // This is so that we try downloading later if it ever finishs. 
+          //global.torrents[item.hash] = false;
           // TODO: Add a watcher then try downloading the torrent.
         }
       }

@@ -18,7 +18,6 @@ var config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
 
 var app = express();
 
-// TODO: Move to config
 const PORT = 8080;
 
 //We need a function which handles requests and send response
