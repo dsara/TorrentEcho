@@ -1,7 +1,20 @@
 var http = require('http');
+var fs = require('fs');
 var express = require('express');
 var sync = require('./sync.js');
-var config = require('./config.json');
+
+var configFile = '/config/config.json';
+// Check if config file exists, if not create it with the sample data.
+try {
+  var stats = fs.statSync(configFile);
+}
+ catch (e) {
+  console.log("config file not found, creating from sample!")
+  fs.writeFileSync(configFile, fs.readFileSync('./config.json.sample'));
+}
+
+// read in and parse the config file
+var config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
 
 var app = express();
 
@@ -21,9 +34,7 @@ app.use(function(request, response, next) {
 });
 
 app.get("/download/tv", function(req, res) {
-  res.writeHead(200, {
-    'Content-Type': 'text/plain'
-  });
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
 
   try {
     var syncer = new sync(config);
@@ -36,7 +47,7 @@ app.get("/download/tv", function(req, res) {
       }
     }
 
-    syncer.sync('test', "test/", callback);
+    syncer.sync('test', "/download/", callback);
 
   } catch (err) {
     res.end(err);
