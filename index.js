@@ -3,7 +3,7 @@ var fs = require('fs');
 var express = require('express');
 var sync = require('./sync.js');
 
-var configFile = '/config/config.json';
+var configFile = './config.json';
 // Check if config file exists, if not create it with the sample data.
 try {
   var stats = fs.statSync(configFile);
@@ -33,7 +33,8 @@ app.use(function(request, response, next) {
 
 });
 
-app.get("/download/tv", function(req, res) {
+app.get("/download/:label", function(req, res) {
+  var label = req.params.label;
   res.writeHead(200, { 'Content-Type': 'text/plain' });
 
   try {
@@ -47,7 +48,14 @@ app.get("/download/tv", function(req, res) {
       }
     }
 
-    syncer.sync('test', "/download/", callback);
+    if (label in config.labelDownloadFolders)
+    {
+          //  call sync passing in config for the label
+          syncer.sync(label, config.rootDownloadFolder + config.labelDownloadFolders[label], callback);
+    }
+    else {
+      res.end("Label not found in configuration");
+    }
 
   } catch (err) {
     res.end(err);

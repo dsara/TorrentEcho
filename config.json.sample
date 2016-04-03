@@ -7,5 +7,7 @@
   "pass": "pass",
   "isSecure": false,
   "pget": 5,
-  "useTemp": true
+  "useTemp": true,
+  "rootDownloadFolder":"/download",
+  "labelDownloadFolders": { "tv": "/tv", "movie": "/movie" }
 }
