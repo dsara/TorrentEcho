@@ -9,5 +9,6 @@
   "pget": 5,
   "useTemp": true,
   "rootDownloadFolder":"/download",
-  "labelDownloadFolders": { "tv": "/tv", "movie": "/movie" }
+  "labelDownloadFolders": { "tv": "/tv", "movie": "/movie" },
+  "doneLabel": "Done"
 }

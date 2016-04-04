@@ -156,6 +156,10 @@ Rtorrent.prototype.setPath = function(hash, directory, callback) {
   this.get('d.set_directory', [hash, directory], callback);
 };
 
+Rtorrent.prototype.setLabel = function(hash, label, callback) {
+  this.get('d.custom1.set', [hash, label], callback);
+};
+
 module.exports = Rtorrent;
 
 var fields = {

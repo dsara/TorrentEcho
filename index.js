@@ -47,10 +47,9 @@ app.get("/download/:label", function(req, res) {
       }
     }
 
-    if (label in config.labelDownloadFolders)
-    {
-          //  call sync passing in config for the label
-          syncer.sync(label, config.rootDownloadFolder + config.labelDownloadFolders[label], callback);
+    if (label in config.labelDownloadFolders) {
+      //  call sync passing in config for the label
+      syncer.sync(label, config.rootDownloadFolder + config.labelDownloadFolders[label], config.doneLabel, callback);
     }
     else {
       res.end("Label not found in configuration");
