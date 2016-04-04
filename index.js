@@ -32,7 +32,7 @@ app.use(function(request, response, next) {
 
 });
 
-app.get("/download/:label", function(req, res) {
+app.post("/download/:label", function(req, res) {
   var label = req.params.label;
   res.writeHead(200, { 'Content-Type': 'text/plain' });
 
