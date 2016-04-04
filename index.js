@@ -52,7 +52,7 @@ app.post("/download/:label", function(req, res) {
       syncer.sync(label, config.rootDownloadFolder + config.labelDownloadFolders[label], config.doneLabel, callback);
     }
     else {
-      res.end("Label not found in configuration");
+      res.end("Label '" + label + "' not found in configuration");
     }
 
   } catch (err) {
