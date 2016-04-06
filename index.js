@@ -3,7 +3,7 @@ var fs = require('fs');
 var express = require('express');
 var sync = require('./sync.js');
 
-var configFile = '/config/config.json';
+var configFile = './config.json';
 // Check if config file exists, if not create it with the sample data.
 try {
   var stats = fs.statSync(configFile);

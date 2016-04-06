@@ -64,20 +64,10 @@ Sync.prototype.sync = function(label, location, doneLabel, callback) {
                     if (item.hash in global.torrents)
                         WriteMessage(item.name + " already being handled by another call. Skipping", callback);
                     else {
-                        if (item.complete == 1) {
                             // Set global tag to true, since we are going to try downloading it.
-                            global.torrents[item.hash] = new Torrent(true, item.ismultifile, item.path, location);
-
+                            global.torrents[item.hash] = new Torrent(item.complete == 1, item.ismultifile, item.name, item.path, location);
                             WriteMessage("Adding " + item.name + " to download", callback);
                         }
-                    // } else {
-                    //     //// Set global flag to false, since we haven't started it yet.
-                    //     // Commented out so we don't set anything until the watcher is created
-                    //     // This is so that we try downloading later if it ever finishs.
-                    //     //global.torrents[item.hash] = false;
-                    //     // TODO: Add a watcher then try downloading the torrent.
-                    // }
-                }
             });
 
         WriteMessage("Starting Download", callback, true);
@@ -108,16 +98,20 @@ Sync.prototype.ProcessDownload = function(torrentHash) {
         item.ShouldDownload = false;
         global.torrents[torrentHash] = item;
 
+        WriteMessage("Starting download for " + item.Name);
+
         // Finally execute the command
         self.ftps.exec(function(err, data) {
             if (err) {
-                WriteMessage(err + " " + data);
+                WriteMessage(err + " " + data.error + " " + data.data);
             } else {
-                WriteMessage(data);
+                WriteMessage("LFTP Response: " + data.data);
             }
 
             // Call cleanup with the configurable delay, so external processes can do whatever they need.
             setTimeout(function() {
+              WriteMessage("Relabelling " + item.Name);
+
               // Call to relabel the torrent
               self.rtorrent.setLabel(torrentHash, self.doneLabel, function() { return; });
 
@@ -146,12 +140,10 @@ function GetNextTorrent() {
 }
 
 function WriteMessage(message, callback, isEnd) {
-    console.log(message);
+    console.log((new Date().toLocaleString()) + " - " + message.toString());
     if (callback) {
         callback(message, isEnd);
     }
 }
-
-
 
 module.exports = Sync;
