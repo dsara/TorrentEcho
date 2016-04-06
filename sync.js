@@ -14,6 +14,7 @@ function Sync(config) {
     self = this;
 
     self.doneLabel = config.doneLabel;
+    self.doneLabelDelay = (config.doneLabelDelay || 0) * 1000;
 
     // Setup based on config
     self.rtorrent = new Rtorrent({
@@ -115,10 +116,14 @@ Sync.prototype.ProcessDownload = function(torrentHash) {
                 WriteMessage(data);
             }
 
-            self.rtorrent.setLabel(torrentHash, self.doneLabel, function() { return; });
+            // Call cleanup with the configurable delay, so external processes can do whatever they need.
+            setTimeout(function() {
+              // Call to relabel the torrent
+              self.rtorrent.setLabel(torrentHash, self.doneLabel, function() { return; });
 
-            // Remove the torrent from the global collection
-            delete global.torrents[torrentHash];
+              // Remove the torrent from the global collection
+              delete global.torrents[torrentHash];
+            }, self.doneLabelDelay);
 
             // Mark that we are done downloading.
             global.isDownloading = false;

@@ -10,5 +10,6 @@
   "useTemp": true,
   "rootDownloadFolder":"/download",
   "labelDownloadFolders": { "tv": "/tv", "movie": "/movie" },
-  "doneLabel": "Done"
+  "doneLabel": "Done",
+  "doneLabelDelay": 300
 }
