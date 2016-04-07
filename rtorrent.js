@@ -160,6 +160,15 @@ Rtorrent.prototype.setLabel = function(hash, label, callback) {
   this.get('d.custom1.set', [hash, label], callback);
 };
 
+Rtorrent.prototype.getSingle = function(hash, callback){
+  this.get('d.get_complete', [hash], callback);
+
+}
+
+Rtorrent.prototype.getCommands = function(callback){
+  this.get('system.listMethods', null, callback);
+}
+
 module.exports = Rtorrent;
 
 var fields = {
