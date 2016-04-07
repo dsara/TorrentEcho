@@ -84,8 +84,9 @@ Sync.prototype.sync = function(label, location, doneLabel, callback) {
             self.ProcessDownload(nextTorrentHash);
           }
         }
-      }
+
 });
+}
 
 Sync.prototype.ProcessDownload = function(torrentHash) {
     var item = global.torrents[torrentHash];
