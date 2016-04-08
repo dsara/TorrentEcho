@@ -6,8 +6,8 @@ if (!global.torrents) {
     global.torrents = [];
 }
 
-if (!global.isDownloading){
-  global.isDownloading = false;
+if (!global.isDownloading) {
+    global.isDownloading = false;
 }
 
 function Sync(config) {
@@ -50,36 +50,36 @@ Sync.prototype.sync = function(label, location, doneLabel, callback) {
     WriteMessage("Getting Torrents");
 
     self.rtorrent.getTorrents(function(err, data) {
-            if (err) return console.log('err: ', err);
+        if (err) return console.log('err: ', err);
 
-            // filter down to torrents with the label and are complete
-            var torrents = data.filter(function(obj) {
-                return obj.label === label;
-            });
+        // filter down to torrents with the label and are complete
+        var torrents = data.filter(function(obj) {
+            return obj.label === label;
+        });
 
-            WriteMessage(torrents.length + " torrents with label " + label, callback);
+        WriteMessage(torrents.length + " torrents with label " + label, callback);
 
-            // Loop over each torrent and add commands to queue them
-            torrents.forEach(function(item) {
-                    if (item.hash in global.torrents)
-                        WriteMessage(item.name + " already being handled by another call. Skipping", callback);
-                    else {
-                            // Set global tag to true, since we are going to try downloading it.
-                            global.torrents[item.hash] = new Torrent(item.complete == 1, item.ismultifile, item.name, item.path, location);
+        // Loop over each torrent and add commands to queue them
+        torrents.forEach(function(item) {
+            if (item.hash in global.torrents)
+                WriteMessage(item.name + " already being handled by another call. Skipping", callback);
+            else {
+                // Set global tag to true, since we are going to try downloading it.
+                global.torrents[item.hash] = new Torrent(item.complete == 1, item.ismultifile, item.name, item.path, location);
 
-                             // If the torrent isn't complete, check it
-                            if (!(item.complete == 1)){
-                              WriteMessage(item.name + " incomplete, waiting for torrent to complete", callback);
-                              self.CheckTorrentComplete(item.hash);
-                            } else {
-                              WriteMessage("Adding " + item.name + "to download", callback);
-                            }
-                        }
-            });
+                // If the torrent isn't complete, check it
+                if (!(item.complete == 1)) {
+                    WriteMessage(item.name + " incomplete, waiting for torrent to complete", callback);
+                    self.CheckTorrentComplete(item.hash);
+                } else {
+                    WriteMessage("Adding " + item.name + "to download", callback);
+                }
+            }
+        });
 
         WriteMessage("Starting Download", callback, true);
         self.DownloadNext();
-});
+    });
 }
 
 Sync.prototype.ProcessDownload = function(torrentHash) {
@@ -110,13 +110,15 @@ Sync.prototype.ProcessDownload = function(torrentHash) {
 
             // Call cleanup with the configurable delay, so external processes can do whatever they need.
             setTimeout(function() {
-              WriteMessage("Relabelling " + item.Name);
+                WriteMessage("Relabelling " + item.Name);
 
-              // Call to relabel the torrent
-              self.rtorrent.setLabel(torrentHash, self.doneLabel, function() { return; });
+                // Call to relabel the torrent
+                self.rtorrent.setLabel(torrentHash, self.doneLabel, function() {
+                    return;
+                });
 
-              // Remove the torrent from the global collection
-              delete global.torrents[torrentHash];
+                // Remove the torrent from the global collection
+                delete global.torrents[torrentHash];
             }, self.doneLabelDelay);
 
             // Mark that we are done downloading.
@@ -128,37 +130,41 @@ Sync.prototype.ProcessDownload = function(torrentHash) {
 };
 
 // Method for just grabbing the next download and starting it if we are currently not downloading anything
-Sync.prototype.DownloadNext = function(){
-  // Check if we should try to download it immediately
-  if (global.isDownloading == false){
-    var nextTorrentHash = GetNextTorrent();
-    if (nextTorrentHash){
-      self.ProcessDownload(nextTorrentHash);
+Sync.prototype.DownloadNext = function() {
+    // Check if we should try to download it immediately
+    if (global.isDownloading == false) {
+        var nextTorrentHash = GetNextTorrent();
+        if (nextTorrentHash) {
+            self.ProcessDownload(nextTorrentHash);
+        }
     }
-  }
 }
 
-Sync.prototype.CheckTorrentComplete = function(hash){
-  self.rtorrent.getSingle(hash, function(err, data){
-          if (err) return console.log('err: ', err);
-          if (data == 1) {
+Sync.prototype.CheckTorrentComplete = function(hash) {
+    self.rtorrent.getSingle(hash, function(err, data) {
+        if (err) return console.log('err: ', err);
+        if (data == 1) {
             global.torrents[hash].ShouldDownload = true;
 
             // Try to start download if we can
             self.DownloadNext();
-          } else {
+        } else {
             // Otherwise check again in 15 seconds
-            setTimeout(function(){ self.CheckTorrentComplete(hash); }, 15000)
-          }
-  });
+            setTimeout(function() {
+                self.CheckTorrentComplete(hash);
+            }, 15000)
+        }
+    });
 }
 
 function GetNextTorrent() {
-  var keys = Object.keys(global.torrents);
-  if (keys.length > 0){
-    return keys.filter(function(key){return global.torrents[key].ShouldDownload == true;})[0];
-  }
-  return null;
+    var keys = Object.keys(global.torrents);
+    if (keys.length > 0) {
+        return keys.filter(function(key) {
+            return global.torrents[key].ShouldDownload == true;
+        })[0];
+    }
+    return null;
 }
 
 function WriteMessage(message, callback, isEnd) {

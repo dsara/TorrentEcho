@@ -1,4 +1,4 @@
-function Torrent (shouldDownload, isDirectory, name, path, downloadLocation) {
+function Torrent(shouldDownload, isDirectory, name, path, downloadLocation) {
     var self = this;
     self.ShouldDownload = shouldDownload;
     self.IsDirectory = isDirectory;
