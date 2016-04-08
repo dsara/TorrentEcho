@@ -47,7 +47,7 @@ function Sync(config) {
 
 Sync.prototype.sync = function(label, location, doneLabel, callback) {
 
-    console.log("Getting Torrents");
+    WriteMessage("Getting Torrents");
 
     self.rtorrent.getTorrents(function(err, data) {
             if (err) return console.log('err: ', err);
@@ -66,25 +66,19 @@ Sync.prototype.sync = function(label, location, doneLabel, callback) {
                     else {
                             // Set global tag to true, since we are going to try downloading it.
                             global.torrents[item.hash] = new Torrent(item.complete == 1, item.ismultifile, item.name, item.path, location);
-                            WriteMessage("Adding " + item.name + " to download", callback);
 
                              // If the torrent isn't complete, check it
                             if (!(item.complete == 1)){
+                              WriteMessage(item.name + " incomplete, waiting for torrent to complete", callback);
                               self.CheckTorrentComplete(item.hash);
+                            } else {
+                              WriteMessage("Adding " + item.name + "to download", callback);
                             }
                         }
             });
 
         WriteMessage("Starting Download", callback, true);
-
-        //Check if we are already downloading, if not, start the download.
-        if (!global.isDownloading) {
-          var nextTorrentHash = GetNextTorrent();
-          if (nextTorrentHash){
-            self.ProcessDownload(nextTorrentHash);
-          }
-        }
-
+        self.DownloadNext();
 });
 }
 
@@ -128,15 +122,12 @@ Sync.prototype.ProcessDownload = function(torrentHash) {
             // Mark that we are done downloading.
             global.isDownloading = false;
 
-            // Grab next download and make call to download
-            var nextTorrentHash = GetNextTorrent();
-            if (nextTorrentHash){
-              self.ProcessDownload(nextTorrentHash);
-            }
+            self.DownloadNext();
         });
     }
 };
 
+// Method for just grabbing the next download and starting it if we are currently not downloading anything
 Sync.prototype.DownloadNext = function(){
   // Check if we should try to download it immediately
   if (global.isDownloading == false){
@@ -152,6 +143,9 @@ Sync.prototype.CheckTorrentComplete = function(hash){
           if (err) return console.log('err: ', err);
           if (data == 1) {
             global.torrents[hash].ShouldDownload = true;
+
+            // Try to start download if we can
+            self.DownloadNext();
           } else {
             // Otherwise check again in 15 seconds
             setTimeout(function(){ self.CheckTorrentComplete(hash); }, 15000)
