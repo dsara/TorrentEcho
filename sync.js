@@ -70,7 +70,7 @@ Sync.prototype.sync = function(label, location, doneLabel, callback) {
 
                              // If the torrent isn't complete, check it
                             if (!(item.complete == 1)){
-                              CheckTorrentComplete(item.hash);
+                              self.CheckTorrentComplete(item.hash);
                             }
                         }
             });
