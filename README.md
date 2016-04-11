@@ -1,4 +1,4 @@
-# RTorrentEcho
+# TorrentEcho
 Node JS tool to facilitate automatic downloading of labeled torrents from rutorrent.
 
 # Docker command
