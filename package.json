@@ -1,16 +1,16 @@
 {
-    "name": "rtorrentSync",
+    "name": "TorrentEcho",
     "version": "0.5.0",
-    "homepage": "https://github.com/darknessgp/RTorrentEcho",
+    "homepage": "https://github.com/darknessgp/TorrentEcho",
     "description": "Provide automated downloads from rtorrent client with lftp",
     "main": "index.js",
     "scripts": {},
     "repository": {
         "type": "git",
-        "url": "https://github.com/darknessgp/RTorrentEcho.git"
+        "url": "https://github.com/darknessgp/TorrentEcho.git"
     },
     "bugs": {
-        "url": "https://github.com/darknessgp/RTorrentEcho/issues"
+        "url": "https://github.com/darknessgp/TorrentEcho/issues"
     },
     "dependencies": {
         "express": "^4.13.4",
