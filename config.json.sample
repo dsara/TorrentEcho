@@ -11,5 +11,6 @@
   "rootDownloadFolder":"/download",
   "labelDownloadFolders": { "tv": "/tv", "movie": "/movie" },
   "doneLabel": "Done",
-  "doneLabelDelay": 300
+  "doneLabelDelay": 300,
+  "verboseLogging": false
 }

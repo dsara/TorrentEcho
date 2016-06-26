@@ -15,6 +15,7 @@ function Sync(config) {
 
     self.doneLabel = config.doneLabel;
     self.doneLabelDelay = (config.doneLabelDelay || 0) * 1000;
+    self.verboseLogging = config.verboseLogging || false;
 
     // Setup based on config
     self.rtorrent = new Rtorrent({
@@ -89,9 +90,11 @@ Sync.prototype.ProcessDownload = function(torrentHash) {
     // Check if we should even try downloading
     if (item.ShouldDownload) {
         if (item.IsDirectory == true) {
-            self.ftps.mirror(item.Path, item.DownloadLocation);
+            var mirrorCommand = self.ftps.mirror(item.Path, item.DownloadLocation);
+            WriteMessage("Wrote lftp command: " + mirrorCommand);
         } else { // Otherwise use pget
-            self.ftps.pget(item.Path, item.DownloadLocation);
+            var pgetCommand = self.ftps.pget(item.Path, item.DownloadLocation);
+            WriteMessage("Wrote lftp command: " + pgetCommand);
         }
 
         // Mark torrent as should not download, since we are executing on it
