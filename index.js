@@ -8,7 +8,7 @@ var configFile = '/config/config.json';
 try {
     var stats = fs.statSync(configFile);
 } catch (e) {
-    console.log("config file not found, creating from sample!")
+    WriteMessage("config file not found, creating from sample!")
     fs.writeFileSync(configFile, fs.readFileSync('./config.json.sample'));
 }
 
@@ -23,10 +23,10 @@ const PORT = 8080;
 app.use(function(request, response, next) {
     try {
         //log the request on console
-        console.log(request.url);
+        WriteMessage(request.url);
         next();
     } catch (err) {
-        console.log(err);
+        WriteMessage(err);
     }
 
 });
@@ -64,5 +64,13 @@ app.post("/download/:label", function(req, res) {
 //Lets start our server
 app.listen(PORT, function() {
     //Callback triggered when server is successfully listening. Hurray!
-    console.log("Server listening on: http://localhost:%s", PORT);
+    WriteMessage("Server listening on: http://localhost:" + PORT);
 });
+
+// Global function to write to console and optionally to a callback
+WriteMessage = function(message, callback, isEnd) {
+    console.log((new Date().toLocaleString()) + " - " + message.toString());
+    if (callback) {
+        callback(message, isEnd);
+    }
+}

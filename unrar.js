@@ -22,9 +22,9 @@ Unrar.prototype.HandleFolder = function(folderPath) {
 
     rar.extract(folderPath, null, function(err) {
         if (err) {
-            console.log("Error in unrar for " + folderPath + " ERROR: " + err);
+            WriteMessage("Error in unrar for " + folderPath + " ERROR: " + err);
         } else {
-            console.log(rarFile + " extracted");
+            WriteMessage(rarFile + " extracted");
         }
     });
 }

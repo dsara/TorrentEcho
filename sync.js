@@ -54,7 +54,7 @@ Sync.prototype.sync = function(label, location, doneLabel, callback) {
     WriteMessage("Getting Torrents");
 
     self.rtorrent.getTorrents(function(err, data) {
-        if (err) return console.log('err: ', err);
+        if (err) return WriteMessage('err: ', err);
 
         // filter down to torrents with the label and are complete
         var torrents = data.filter(function(obj) {
@@ -153,7 +153,7 @@ Sync.prototype.DownloadNext = function() {
 
 Sync.prototype.CheckTorrentComplete = function(hash) {
     self.rtorrent.getSingle(hash, function(err, data) {
-        if (err) return console.log('err: ', err);
+        if (err) return WriteMessage('err: ', err);
         if (data == 1) {
             global.torrents[hash].ShouldDownload = true;
 
@@ -176,13 +176,6 @@ function GetNextTorrent() {
         })[0];
     }
     return null;
-}
-
-function WriteMessage(message, callback, isEnd) {
-    console.log((new Date().toLocaleString()) + " - " + message.toString());
-    if (callback) {
-        callback(message, isEnd);
-    }
 }
 
 module.exports = Sync;
