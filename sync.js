@@ -113,7 +113,7 @@ Sync.prototype.ProcessDownload = function(torrentHash) {
             } else {
                 WriteMessage("LFTP Response: " + data.data);
 
-                if (item.IsDirectory) {
+                if (item.IsDirectory == true) {
                     // Make call to try and unrar the folder
                     self.unrar.HandleFolder(item.DownloadLocation + "/" + item.Name);
                 }
