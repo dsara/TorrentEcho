@@ -76,7 +76,7 @@ Sync.prototype.sync = function(label, location, doneLabel, callback) {
                     WriteMessage(item.name + " incomplete, waiting for torrent to complete", callback);
                     self.CheckTorrentComplete(item.hash);
                 } else {
-                    WriteMessage("Adding " + item.name + "to download", callback);
+                    WriteMessage("Adding " + item.name + " to download", callback);
                 }
             }
         });
