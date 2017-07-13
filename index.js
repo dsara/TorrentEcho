@@ -6,10 +6,10 @@ var sync = require('./sync.js');
 var configFile = '/config/config.json';
 // Check if config file exists, if not create it with the sample data.
 try {
-    var stats = fs.statSync(configFile);
+  var stats = fs.statSync(configFile);
 } catch (e) {
-    WriteMessage("config file not found, creating from sample!")
-    fs.writeFileSync(configFile, fs.readFileSync('./config.json.sample'));
+  WriteMessage("config file not found, creating from sample!")
+  fs.writeFileSync(configFile, fs.readFileSync('./config.json.sample'));
 }
 
 // read in and parse the config file
@@ -19,58 +19,75 @@ var app = express();
 
 const PORT = 8080;
 
+// Explicitly say that we are going to parse the body
+app.use(express.bodyParser());
+
 //We need a function which handles requests and send response
 app.use(function(request, response, next) {
-    try {
-        //log the request on console
-        WriteMessage(request.url);
-        next();
-    } catch (err) {
-        WriteMessage(err);
-    }
+  try {
+    //log the request on console
+    WriteMessage(request.url);
+    next();
+  } catch (err) {
+    WriteMessage(err);
+  }
 
 });
 
 app.post("/download/:label", function(req, res) {
-    var label = req.params.label;
-    res.writeHead(200, {
-        'Content-Type': 'text/plain'
-    });
+  var label = req.params.label;
+  res.writeHead(200, {'Content-Type': 'text/plain'});
 
-    try {
-        var syncer = new sync(config);
+  try {
+    var syncer = new sync(config);
 
-        var callback = function(message, end) {
-            if (end) {
-                res.end(message);
-            } else {
-                res.write(message + " \n");
-            }
-        }
-
-        if (label in config.labelDownloadFolders) {
-            //  call sync passing in config for the label
-            syncer.sync(label, config.rootDownloadFolder + config.labelDownloadFolders[label], config.doneLabel, callback);
-        } else {
-            res.end("Label '" + label + "' not found in configuration");
-        }
-
-    } catch (err) {
-        res.end(err);
+    var callback = function(message, end) {
+      if (end) {
+        res.end(message);
+      } else {
+        res.write(message + " \n");
+      }
     }
+
+    if (label in config.labelDownloadFolders) {
+      //  call sync passing in config for the label
+      syncer.sync(label, config.rootDownloadFolder + config.labelDownloadFolders[label], config.doneLabel, callback);
+    } else {
+      res.end("Label '" + label + "' not found in configuration");
+    }
+
+  } catch (err) {
+    res.end(err);
+  }
 });
 
+// Endpoint for processing sonarr webhooks
+app.post("/sonarr", function(req, res) {
+
+  // Write out the body for now.
+  WriteMessage(req.body);
+
+  // Write out 200 for now...
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+
+  try {
+    res.end("DONE");
+
+  } catch (err) {
+    res.end(err);
+  }
+});
 
 //Lets start our server
 app.listen(PORT, function() {
-    //Callback triggered when server is successfully listening. Hurray!
-    WriteMessage("Server listening on: http://localhost:" + PORT);
+  //Callback triggered when server is successfully listening. Hurray!
+  WriteMessage("Server listening on: http://localhost:" + PORT);
 });
 
 // Global function to write to console and optionally to a callback
 WriteMessage = function(message, callback, isEnd) {
-    console.log((new Date().toLocaleString()) + " - " + message.toString());
-    if (callback) {
-        callback(message, isEnd);
-    }
+  console.log((new Date().toLocaleString()) + " - " + message.toString());
+  if (callback) {
+    callback(message, isEnd);
+  }
 }
