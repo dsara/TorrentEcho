@@ -13,5 +13,6 @@
   "doneLabel": "Done",
   "doneLabelDelay": 300,
   "verboseLogging": false,
-  "syncFolders": {"tv": { "source": "/download", "destination": "/download"}}
+  "syncFolders": {"tv": { "source": "/download", "destination": "/download"}},
+  "syncRemoveSource": true
 }

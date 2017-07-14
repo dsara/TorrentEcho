@@ -79,7 +79,7 @@ app.post("/sync/:label", function(req, res) {
         additionalLftpCommands: additionalCommands
       });
 
-      var mirrorCommand = ftps.mirror(config.syncFolders[label].source, config.syncFolders[label].destination);
+      var mirrorCommand = ftps.mirror(config.syncFolders[label].source, config.syncFolders[label].destination, config.syncRemoveSource);
       WriteMessage("Wrote lftp command: " + mirrorCommand);
 
       //  call sync passing in config for the label
@@ -89,10 +89,9 @@ app.post("/sync/:label", function(req, res) {
         } else {
           WriteMessage("LFTP Response: " + data.data);
         }
-
-        res.end("Finished");
       });
 
+      res.end("Download Started");
     } else {
       res.end("Sync Label '" + label + "' not found in configuration");
     }

@@ -1,6 +1,6 @@
 var FTP = require('ftps');
 
-FTP.prototype.mirror = function(remotePath, localPath) {
+FTP.prototype.mirror = function(remotePath, localPath, removeSource) {
     if (!localPath || !remotePath) {
         return this;
     }
@@ -16,7 +16,12 @@ FTP.prototype.mirror = function(remotePath, localPath) {
         localPath = localPath + '/';
     }
 
-    return this.raw("mirror -c -vvv " + this._escapeshell(remotePath) + " " + this._escapeshell(localPath));
+    options = '';
+    if (removeSource){
+      options += " --Remove-source-files ";
+    }
+
+    return this.raw("mirror -c -vvv " + options + this._escapeshell(remotePath) + " " + this._escapeshell(localPath));
 }
 
 FTP.prototype.queuemirror = function(remotePath, localPath) {
