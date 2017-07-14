@@ -1,7 +1,6 @@
 var http = require('http');
 var fs = require('fs');
 var express = require('express');
-var bodyParser = require('body-Parser');
 var sync = require('./sync.js');
 var FTPS = require('./lftp.js');
 
