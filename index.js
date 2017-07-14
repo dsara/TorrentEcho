@@ -70,7 +70,7 @@ app.post("/sync/:label", function(req, res) {
       // Setup some default options... need to clean this up at some point.
       var additionalCommands = "set mirror:use-pget-n " + config.pget + ";set pget:default-n " + config.pget + ";set xfer:use-temp-file true;set xfer:temp-file-name *.tmp";
 
-      self.ftps = new FTPS({
+      ftps = new FTPS({
         host: config.host,
         username: config.user,
         password: config.pass,
@@ -79,16 +79,18 @@ app.post("/sync/:label", function(req, res) {
         additionalLftpCommands: additionalCommands
       });
 
-      var mirrorCommand = self.ftps.mirror(config.syncFolders[label].source, config.syncFolders[label].destination);
+      var mirrorCommand = ftps.mirror(config.syncFolders[label].source, config.syncFolders[label].destination);
       WriteMessage("Wrote lftp command: " + mirrorCommand);
 
       //  call sync passing in config for the label
-      self.ftps.exec(function(err, data) {
+      ftps.exec(function(err, data) {
         if (err) {
           WriteMessage(err + " " + data.error + " " + data.data);
         } else {
           WriteMessage("LFTP Response: " + data.data);
         }
+
+        res.end("Finished");
       });
 
     } else {
@@ -96,7 +98,7 @@ app.post("/sync/:label", function(req, res) {
     }
 
   } catch (err) {
-    res.end(err);
+    res.end("ERROR: " + err);
   }
 });
 
