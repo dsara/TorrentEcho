@@ -12,5 +12,6 @@
   "labelDownloadFolders": { "tv": "/tv", "movie": "/movie" },
   "doneLabel": "Done",
   "doneLabelDelay": 300,
-  "verboseLogging": false
+  "verboseLogging": false,
+  "syncFolders": {"tv": { "source": "/download", "destination": "/download"}}
 }

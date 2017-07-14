@@ -1,14 +1,16 @@
 var http = require('http');
 var fs = require('fs');
 var express = require('express');
+var bodyParser = require('body-Parser');
 var sync = require('./sync.js');
+var FTPS = require('./lftp.js');
 
 var configFile = '/config/config.json';
 // Check if config file exists, if not create it with the sample data.
 try {
   var stats = fs.statSync(configFile);
 } catch (e) {
-  WriteMessage("config file not found, creating from sample!")
+  //WriteMessage("config file not found, creating from sample!")
   fs.writeFileSync(configFile, fs.readFileSync('./config.json.sample'));
 }
 
@@ -18,9 +20,6 @@ var config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
 var app = express();
 
 const PORT = 8080;
-
-// Explicitly say that we are going to parse the body
-app.use(express.bodyParser());
 
 //We need a function which handles requests and send response
 app.use(function(request, response, next) {
@@ -61,17 +60,41 @@ app.post("/download/:label", function(req, res) {
   }
 });
 
-// Endpoint for processing sonarr webhooks
-app.post("/sonarr", function(req, res) {
-
-  // Write out the body for now.
-  WriteMessage(req.body);
-
-  // Write out 200 for now...
+// Endpoint for procesing a folder sync
+app.post("/sync/:label", function(req, res) {
+  var label = req.params.label;
   res.writeHead(200, {'Content-Type': 'text/plain'});
 
   try {
-    res.end("DONE");
+
+    if (label in config.syncFolders) {
+      // Setup some default options... need to clean this up at some point.
+      var additionalCommands = "set mirror:use-pget-n " + config.pget + ";set pget:default-n " + config.pget + ";set xfer:use-temp-file true;set xfer:temp-file-name *.tmp";
+
+      self.ftps = new FTPS({
+        host: config.host,
+        username: config.user,
+        password: config.pass,
+        protocol: 'sftp',
+        autoConfirm: true,
+        additionalLftpCommands: additionalCommands
+      });
+
+      var mirrorCommand = self.ftps.mirror(config.syncFolders[label].source, config.syncFolders[label].destination);
+      WriteMessage("Wrote lftp command: " + mirrorCommand);
+
+      //  call sync passing in config for the label
+      self.ftps.exec(function(err, data) {
+        if (err) {
+          WriteMessage(err + " " + data.error + " " + data.data);
+        } else {
+          WriteMessage("LFTP Response: " + data.data);
+        }
+      });
+
+    } else {
+      res.end("Sync Label '" + label + "' not found in configuration");
+    }
 
   } catch (err) {
     res.end(err);
