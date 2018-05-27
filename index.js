@@ -1,21 +1,23 @@
 var http = require('http');
 var fs = require('fs');
 var express = require('express');
-var sync = require('./sync.js');
-var FTPS = require('./lftp.js');
+var sync = require('./lib/sync');
+var FTPS = require('./lib/lftp');
+var logs = require('./lib/logs');
 
-var configFile = '/config/config.json';
+const configFile = '/config/config.json';
+
 // Check if config file exists, if not create it with the sample data.
 try {
   var stats = fs.statSync(configFile);
 } catch (e) {
-  //WriteMessage("config file not found, creating from sample!")
+  logs.writeMessage("Config file not found, creating from sample!");
   fs.writeFileSync(configFile, fs.readFileSync('./config.json.sample'));
 }
-
 // read in and parse the config file
-var config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
 
+process.chdir(config.nodeDownloadFolder);
 var app = express();
 
 const PORT = 8080;
@@ -24,10 +26,10 @@ const PORT = 8080;
 app.use(function(request, response, next) {
   try {
     //log the request on console
-    WriteMessage(request.url);
+    logs.writeMessage(request.url);
     next();
-  } catch (err) {
-    WriteMessage(err);
+  } catch (error) {
+    logs.writeMessage(error);
   }
 
 });
@@ -54,8 +56,8 @@ app.post("/download/:label", function(req, res) {
       res.end("Label '" + label + "' not found in configuration");
     }
 
-  } catch (err) {
-    res.end(err);
+  } catch (error) {
+    res.end(error);
   }
 });
 
@@ -79,15 +81,15 @@ app.post("/sync/:label", function(req, res) {
         additionalLftpCommands: additionalCommands
       });
 
-      var mirrorCommand = ftps.mirror(config.syncFolders[label].source, config.syncFolders[label].destination, config.syncRemoveSource);
-      WriteMessage("Wrote lftp command: " + mirrorCommand);
+      var mirrorCommand = ftps.mirrorTorrent(config.syncFolders[label].source, config.syncFolders[label].destination, config.syncRemoveSource);
+      logs.writeMessage("Wrote lftp command: " + mirrorCommand);
 
       //  call sync passing in config for the label
-      ftps.exec(function(err, data) {
-        if (err) {
-          WriteMessage(err + " " + data.error + " " + data.data);
+      ftps.exec(function(error, data) {
+        if (error) {
+          logs.writeMessage(error + " " + data.erroror + " " + data.data);
         } else {
-          WriteMessage("LFTP Response: " + data.data);
+          logs.writeMessage("LFTP Response: " + data.data);
         }
       });
 
@@ -96,21 +98,12 @@ app.post("/sync/:label", function(req, res) {
       res.end("Sync Label '" + label + "' not found in configuration");
     }
 
-  } catch (err) {
-    res.end("ERROR: " + err);
+  } catch (error) {
+    res.end("errorOR: " + error);
   }
 });
 
-//Lets start our server
+// Start server
 app.listen(PORT, function() {
-  //Callback triggered when server is successfully listening. Hurray!
-  WriteMessage("Server listening on: http://localhost:" + PORT);
+  logs.writeMessage("Server listening on: http://localhost:" + PORT);
 });
-
-// Global function to write to console and optionally to a callback
-WriteMessage = function(message, callback, isEnd) {
-  console.log((new Date().toLocaleString()) + " - " + message.toString());
-  if (callback) {
-    callback(message, isEnd);
-  }
-}

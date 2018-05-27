@@ -1,5 +1,5 @@
 {
-    "name": "TorrentEcho",
+    "name": "torrent-echo",
     "version": "0.5.0",
     "homepage": "https://github.com/darknessgp/TorrentEcho",
     "description": "Provide automated downloads from rtorrent client with lftp",
@@ -14,9 +14,13 @@
     },
     "dependencies": {
         "express": "^4.13.4",
-        "ftps": "^0.4.6",
-        "xmlrpc": ">=1.3.0",
-        "node-unrar": "^0.1.2"
+        "ftps": "^1.1.0",
+        "node-unrar": "^0.1.5",
+        "request": "^2.87.0"
+    },
+    "devDependencies": {
+        "@types/request": "^2.47.0",
+        "@types/node": "^10.1.2"
     },
     "author": "DarknessGP <darknessgp@gmail.com>",
     "license": "MIT",

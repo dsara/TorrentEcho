@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:5.10
+FROM mhart/alpine-node:10.2.1
 
 RUN apk add --no-cache bash lftp openssh unrar
 
