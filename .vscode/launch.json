@@ -8,13 +8,15 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceFolder}/index.js"
+      "program": "${workspaceFolder}/build/index.js"
     },
     {
       "type": "node",
-      "request": "launch",
-      "name": "Launch Program",
-      "program": "${workspaceFolder}\\index.js"
+      "request": "attach",
+      "protocol": "inspector",
+      "name": "Attach to Port",
+      "address": "localhost",
+      "port": 9229
     }
   ]
 }
