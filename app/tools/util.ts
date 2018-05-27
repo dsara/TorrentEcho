@@ -1,5 +1,5 @@
 const configFile = '/config/config.json';
-import logs from './logging';
+import { Logs } from './logging';
 import { Config } from './config.model';
 
 export default class Util {

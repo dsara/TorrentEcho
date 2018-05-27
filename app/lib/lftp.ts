@@ -8,7 +8,7 @@ const util = utilities.getInstance();
 export class SFTP {
   ftpsInstance: any;
 
-  constructor(config) {
+  constructor() {
     const pgetCommand = `set mirror:use-pget-n ${util.config.props.pget};
                          set pget:default-n ${util.config.props.pget};
                          set net:limit-total-rate 29360128:0`;
@@ -49,7 +49,7 @@ export class SFTP {
     }
   }
 
-  executeCommands(): any {
+  executeCommands(callback: (error, result) => void): void {
     Logs.writeMessage('Executing stored lftp commands');
     return this.ftpsInstance.exec();
   }

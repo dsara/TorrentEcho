@@ -4,6 +4,7 @@ import * as zlib from 'zlib';
 import * as https from 'https';
 import * as requestLib from 'request';
 import { Logs } from '../tools/logging';
+import { DelugeAuthLogin, DelugeSingleTorrentResult, DelugeTorrent, DelugeTorrentResults, DelugeGeneralResult } from './deluge.model';
 import utilities from '../tools/util';
 
 const util = utilities.getInstance();
@@ -25,13 +26,11 @@ export class Deluge {
 
   id = 0;
 
+  constructor() {}
 
-  constructor() {
-  }
-
-  authenticate(): Promise<{}> {
+  authenticate(): Promise<DelugeAuthLogin> {
     const options: requestLib.UriOptions & requestLib.CoreOptions = {
-      uri: this.props.path,
+      uri: `https://${this.props.host}${this.props.path}`,
       json: {
         method: methods.login,
         params: [this.props.pass],
@@ -50,10 +49,10 @@ export class Deluge {
     });
   }
 
-  call(method, params): Promise<{}> {
+  call<T>(method, params): Promise<T> {
     return this.authenticate().then((auth) => {
       const options: requestLib.UriOptions & requestLib.CoreOptions = {
-        uri: this.props.path,
+        uri: `https://${this.props.host}${this.props.path}`,
         json: {
           method: method,
           params: params,
@@ -61,7 +60,7 @@ export class Deluge {
         }
       };
 
-      return new Promise((resolve, reject) => {
+      return new Promise<T>((resolve, reject) => {
         this.request(options, (error, response, body) => {
           if (error) {
             reject(error);
@@ -73,8 +72,8 @@ export class Deluge {
     });
   }
 
-  getTorrents(label: string): Promise<{}> {
-    return this.call(methods.getTorrrents, [
+  getTorrents(label: string): Promise<DelugeTorrentResults> {
+    return this.call<DelugeTorrentResults>(methods.getTorrrents, [
       [fields.torrents.name, fields.torrents.state, fields.torrents.savePath, fields.torrents.label, fields.torrents.progress],
       {
         label: label,
@@ -83,19 +82,19 @@ export class Deluge {
     ]);
   }
 
-  getSingleTorrent(hash: string): Promise<{}> {
-    return this.call(methods.getTorrent, [
+  getSingleTorrent(hash: string): Promise<DelugeSingleTorrentResult> {
+    return this.call<DelugeSingleTorrentResult>(methods.getTorrent, [
       hash,
       [fields.torrents.name, fields.torrents.state, fields.torrents.savePath, fields.torrents.label, fields.torrents.progress]
     ]);
   }
 
-  changeTorrentLabel(hash: string, label: string) {
-    return this.call(methods.setLabel, [hash, label]);
+  changeTorrentLabel(hash: string, label: string): Promise<DelugeGeneralResult> {
+    return this.call<DelugeGeneralResult>(methods.setLabel, [hash, label]);
   }
 
-  removeTorrent(hash: string, removeFiles: boolean) {
-    return this.call(methods.removeTorrent, [hash, removeFiles]);
+  removeTorrent(hash: string, removeFiles: boolean): Promise<DelugeGeneralResult> {
+    return this.call<DelugeGeneralResult>(methods.removeTorrent, [hash, removeFiles]);
   }
 }
 
