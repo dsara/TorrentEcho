@@ -37,20 +37,20 @@ export class SFTP {
         rootDownloadFolder = rootDownloadFolder + '/';
       }
 
-      Logs.writeMessage('Wrote lftp mirror command: ' + 'mirror -c ' + ftps.escapeshell(remotePath + '/' + torrentName));
-      this.ftpsInstance.raw('mirror -c ' + remotePath + '/' + torrentName);
+      Logs.writeMessage(`Wrote lftp mirror command: mirror -c ${this.ftpsInstance.escapeshell(remotePath + '/' + torrentName)}`);
+      this.ftpsInstance.raw(`mirror -c ${remotePath}/${torrentName}`);
     }
   }
 
   addPGetCommand(remotePath: string, torrentName: string): void {
     if (remotePath && torrentName) {
-      Logs.writeMessage(`Wrote lftp pget command: pget -c ${ftps.escapeshell(remotePath + '/' + torrentName)}`);
-      this.ftpsInstance.raw(`pget -c ${ftps.escapeshell(remotePath + '/' + torrentName)}`);
+      Logs.writeMessage(`Wrote lftp pget command: pget -c ${this.ftpsInstance.escapeshell(remotePath + '/' + torrentName)}`);
+      this.ftpsInstance.raw(`pget -c ${this.ftpsInstance.escapeshell(remotePath + '/' + torrentName)}`);
     }
   }
 
   executeCommands(callback: (error, result) => void): void {
     Logs.writeMessage('Executing stored lftp commands');
-    return this.ftpsInstance.exec();
+    return this.ftpsInstance.exec(callback);
   }
 }

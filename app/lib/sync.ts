@@ -13,7 +13,7 @@ declare var global: {
 };
 
 if (!global.torrents) {
-  global.torrents = undefined;
+  global.torrents = {};
 }
 
 if (!global.isDownloading) {
