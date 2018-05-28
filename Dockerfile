@@ -5,10 +5,12 @@ RUN apk add --no-cache bash lftp openssh unrar
 WORKDIR /src
 COPY . /src
 
-RUN npm install
+RUN npm install && \
+  npm run tsc
 
 VOLUME ["/config"]
 VOLUME ["/download"]
+VOLUME ["/tv"]
 
 EXPOSE 8080
-CMD ["node", "index.js"]
+CMD ["node", "/build/index.js"]
