@@ -26,8 +26,7 @@ export class Sync {
   sftp: SFTP = new SFTP();
   unrar: Unrar = new Unrar();
 
-  constructor() {
-  }
+  constructor() {}
 
   getTorrentCount(torrents: Object) {
     let count = 0;
@@ -109,36 +108,39 @@ export class Sync {
       this.sftp.executeCommands((error, data) => {
         if (error) {
           Logs.writeMessage(error + ' ' + data.error + ' ' + data.data);
+          global.isDownloading = false;
         } else {
           Logs.writeMessage('LFTP Response:');
           console.log(data);
-          // Logs.writeMessage(data.data);
+          global.isDownloading = false;
+          this.downloadNext();
+
+          this.relabelTorrent(torrentHash, item.name, util.config.props.doneLabel)
+            .then((relabled) => {
+              if (relabled.error) {
+                throw new Error(relabled.error);
+              } else {
+                Logs.writeMessage(`${item.name} label changed to ${util.config.props.doneLabel}`);
+                delete global.torrents[torrentHash];
+              }
+            })
+            .catch((err) => {
+              Logs.writeError(`Re-label failed: ${err}`);
+              Logs.writeError(err);
+            });
 
           this.postDownloadHandling(item.name)
             .then(
               (postHandling) => {
                 Logs.writeMessage(`Post download handling done: ${postHandling}`);
-                return this.relabelTorrent(torrentHash, item.name, util.config.props.doneLabel);
-              },
-              (err) => {
-                Logs.writeError(`Post download handling failed: ${err}`);
-                global.isDownloading = false;
-                this.downloadNext();
+                this.moveTorrentForProcessing(torrentHash, item.name);
+                this.processTorrentFiles(torrentHash);
+
               }
             )
-            .then(
-              (relabled) => {
-                Logs.writeMessage(`${item.name} label changed to ${util.config.props.doneLabel}`);
-                global.isDownloading = false;
-                delete global.torrents[torrentHash];
-                this.downloadNext();
-              },
-              (err) => {
-                Logs.writeError(`Re-label failed: ${err}`);
-                global.isDownloading = false;
-                this.downloadNext();
-              }
-            );
+            .catch((err) => {
+              Logs.writeError(`Post download handling failed: ${err}`);
+            });
         }
       });
     }
@@ -163,6 +165,24 @@ export class Sync {
   relabelTorrent(torrentHash: string, torrentName: string, newLabel: string) {
     Logs.writeMessage(`Relabelling ${torrentName}`);
     return this.deluge.changeTorrentLabel(torrentHash, newLabel);
+  }
+
+  moveTorrentForProcessing(torrentHash: string, torrentName: string) {
+    if (util.doesPathExist(`./${torrentHash}`)) {
+      Logs.writeMessage(`Torrent ${torrentName} already has a folder in location; skipping move.`);
+    } else {
+      util.copyToNewDirectory(`./${torrentName}`, torrentHash);
+    }
+  }
+
+  processTorrentFiles(torrentHash: string) {
+    if (util.doesPathExist(`./${torrentHash}`)) {
+      util.renameTVFiles(`./${torrentHash}`);
+      util.restructureTVFiles(`./${torrentHash}`);
+      util.copyAllToTVDestination(`./${torrentHash}`);
+    } else {
+      Logs.writeMessage(`Torrent hash ${torrentHash} folder does not exist to be processed`);
+    }
   }
 
   // Method for just grabbing the next download and starting it if we are currently not downloading anything

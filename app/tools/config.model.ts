@@ -31,6 +31,7 @@ class ConfigProperties {
   useTemp: boolean;
   rootDownloadFolder: string;
   nodeDownloadFolder: string;
+  tvShowsDestination: string;
   labelDownloadFolders: Array<string>;
   doneLabel: string;
   doneLabelDelay: number;
