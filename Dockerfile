@@ -13,4 +13,4 @@ VOLUME ["/download"]
 VOLUME ["/tv"]
 
 EXPOSE 8080
-CMD ["node", "/build/index.js"]
+CMD ["node", "./build/index.js"]
