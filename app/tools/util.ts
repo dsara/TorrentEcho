@@ -1,6 +1,8 @@
 const configFile = '/config/config.json';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as child_process from 'child_process';
+import * as shellEscape from 'shell-escape';
 import { Logs } from './logging';
 import { Config } from './config.model';
 
@@ -42,7 +44,10 @@ export default class Util {
       if (isDirectory) {
         const files = fs.readdirSync(sourceItemPath);
         for (let i = 0; i < files.length; i++) {
-          this.copyFromSourceToDestination(files[i], destinationFolder);
+          this.copyFromSourceToDestination(`${sourceItemPath}/${files[i]}`, destinationFolder);
+        }
+        if (this.isDirectoryEmpty(sourceItemPath)) {
+          fs.rmdirSync(`${sourceItemPath}`);
         }
       } else {
         this.copyFromSourceToDestination(sourceItemPath, destinationFolder);
@@ -57,6 +62,13 @@ export default class Util {
       return false;
     }
     return true;
+  }
+
+  private isDirectoryEmpty(dirPath: string) {
+    const subFiles = fs.readdirSync(dirPath);
+    if (!subFiles.length) {
+      return true;
+    }
   }
 
   private renameTVFile(sourceItemPath: string) {
@@ -131,6 +143,7 @@ export default class Util {
     if (sourceItemPath) {
       const isDirectory = fs.statSync(sourceItemPath);
       if (isDirectory) {
+        this.findFilesToExtract(sourceItemPath);
         const files = fs.readdirSync(sourceItemPath);
         for (let i = 0; i < files.length; i++) {
           this.renameTVFile(`${sourceItemPath}/${files[i]}`);
@@ -226,25 +239,17 @@ export default class Util {
 
         if (tvDateEpisodeMatch != null && foundMatch === false) {
           if (fileName.substring(tvDateEpisodeMatch.index).match(/sample/gi) == null) {
-            this.createIfMissingDirectory(`./${fileName.substr(0, tvDateEpisodeMatch.index - 1)}`);
-            this.createIfMissingDirectory(`./${fileName.substr(0, tvDateEpisodeMatch.index - 1)}/${tvDateEpisodeMatch[0].substr(0, 4)}`);
-            fs.renameSync(sourceItemPath,
-              `./${rootPath}/
-              ${fileName.substr(0, tvDateEpisodeMatch.index - 1)}/
-              ${tvDateEpisodeMatch[0].substr(0, 4)}/
-              ${fileName}${fileExt}`);
+            this.createIfMissingDirectory(`${rootPath}/${fileName.substr(0, tvDateEpisodeMatch.index - 1)}`);
+            this.createIfMissingDirectory(`${rootPath}/${fileName.substr(0, tvDateEpisodeMatch.index - 1)}/${tvDateEpisodeMatch[0].substr(0, 4)}`);
+            fs.renameSync(sourceItemPath, `${fileName.substr(0, tvDateEpisodeMatch.index - 1)}/${tvDateEpisodeMatch[0].substr(0, 4)}/${fileName}${fileExt}`);
             foundMatch = true;
           }
         }
         if (tvRegularMatch != null && foundMatch === false) {
           if (fileName.substring(tvRegularMatch.index).match(/sample/gi) == null) {
-            this.createIfMissingDirectory(`./${fileName.substr(0, tvRegularMatch.index - 1)}`);
-            this.createIfMissingDirectory(`./${fileName.substr(0, tvRegularMatch.index - 1)}/Season.${tvRegularMatch[0].substr(1, 2)}`);
-            fs.renameSync(sourceItemPath,
-              `./${rootPath}/
-              ${fileName.substr(0, tvRegularMatch.index - 1)}/
-              Season.${tvRegularMatch[0].substr(1, 2)}/
-              ${fileName}${fileExt}`);
+            this.createIfMissingDirectory(`${rootPath}/${fileName.substr(0, tvRegularMatch.index - 1)}`);
+            this.createIfMissingDirectory(`${rootPath}/${fileName.substr(0, tvRegularMatch.index - 1)}/Season.${tvRegularMatch[0].substr(1, 2)}`);
+            fs.renameSync(sourceItemPath, `${rootPath}/${fileName.substr(0, tvRegularMatch.index - 1)}/Season.${tvRegularMatch[0].substr(1, 2)}/${fileName}${fileExt}`);
             foundMatch = true;
           }
         }
@@ -266,13 +271,14 @@ export default class Util {
     }
   }
 
-  private createIfMissingDirectory(dir) {
-    if (!this.doesPathExist(dir)) {
+  private createIfMissingDirectory(dir: string) {
+    if (!fs.existsSync(dir)) {
+      console.log('Directory to make: ' + dir);
       fs.mkdirSync(dir);
     }
   }
 
-  private copyToTVDestination(sourceItemPath) {
+  private copyToTVDestination(sourceItemPath: string) {
     if (fs.statSync(sourceItemPath).isDirectory()) {
       const subFiles = fs.readdirSync(sourceItemPath);
       for (let i = 0; i < subFiles.length; i++) {
@@ -284,15 +290,20 @@ export default class Util {
         fs.rmdirSync('./' + sourceItemPath);
       }
     } else {
-      fs.moveSync(`./${sourceItemPath}`, `${this.config.props.tvShowsDestination}/${sourceItemPath}`, { overwrite: true });
+      const finalDirectory = sourceItemPath
+        .split('/')
+        .filter((pathPart: string, pathIndex: number) => pathIndex !== 0 && pathIndex !== 1)
+        .join('/');
+      fs.moveSync(`./${sourceItemPath}`, `${this.config.props.tvShowsDestination}/${finalDirectory}`, { overwrite: true });
     }
   }
 
-  private tvDestinationHasShow(showName) {
+  private tvDestinationHasShow(showName: string) {
     return this.doesPathExist(`${this.config.props.tvShowsDestination}/${showName}`);
   }
 
-  public copyAllToTVDestination(sourceItemPath) {
+  public copyAllToTVDestination(sourceItemPath: string) {
+    let showDirectoryExists = true;
     if (this.config.props.tvShowsDestination) {
       if (sourceItemPath) {
         const isDirectory = fs.statSync(sourceItemPath).isDirectory();
@@ -303,8 +314,35 @@ export default class Util {
               this.copyToTVDestination(`${sourceItemPath}/${files[i]}`);
             } else {
               Logs.writeMessage(`Can't find show name in tv directory ${files[i]} so no copy will occur`);
+              showDirectoryExists = false;
             }
           }
+          if (showDirectoryExists) {
+            fs.rmdirSync(sourceItemPath);
+          }
+        }
+      }
+    }
+  }
+
+  private findFilesToExtract(itemPath: string) {
+    if (fs.statSync(itemPath).isDirectory()) {
+      const files = fs.readdirSync(itemPath);
+      for (let i = 0; i < files.length; i++) {
+        this.findFilesToExtract(itemPath + '/' + files[i]);
+      }
+    } else if (fs.statSync(itemPath).isFile()) {
+      if (itemPath.substr(itemPath.length - 3) === 'rar') {
+        let shouldProcess = false;
+        if (itemPath.match(/part\d{1,}\.rar/gi) != null) {
+          if (itemPath.match(/part(0{1,})?1\.rar/gi) != null) {
+            shouldProcess = true;
+          }
+        } else {
+          shouldProcess = true;
+        }
+        if (shouldProcess) {
+          child_process.execSync(`7z e "${fs.realpathSync(itemPath)}" "-o${path.dirname(path.resolve(itemPath))}" -aoa`);
         }
       }
     }

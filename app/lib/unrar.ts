@@ -3,10 +3,9 @@ import * as path from 'path';
 import * as rarModule from 'node-unrar';
 import { Logs } from '../tools/logging';
 
-export class Unrar {
-  constructor() {}
+export namespace Unrar {
 
-  HandleFolder(folderPath: string, unrarFinished: Function) {
+  export function HandleFolder(folderPath: string, unrarFinished: Function) {
     // figure out path to the rar file, if there is one
     let rarFile = '';
     const files = fs.readdirSync(folderPath);

@@ -24,7 +24,6 @@ export class Sync {
   doneLabelDelay = (util.config.props.doneLabelDelay || 0) * 1000;
   deluge: Deluge = new Deluge();
   sftp: SFTP = new SFTP();
-  unrar: Unrar = new Unrar();
 
   constructor() {}
 
@@ -129,18 +128,21 @@ export class Sync {
               Logs.writeError(err);
             });
 
-          this.postDownloadHandling(item.name)
-            .then(
-              (postHandling) => {
-                Logs.writeMessage(`Post download handling done: ${postHandling}`);
-                this.moveTorrentForProcessing(torrentHash, item.name);
-                this.processTorrentFiles(torrentHash);
+          this.moveTorrentForProcessing(torrentHash, item.name);
+          this.processTorrentFiles(torrentHash);
 
-              }
-            )
-            .catch((err) => {
-              Logs.writeError(`Post download handling failed: ${err}`);
-            });
+          // this.postDownloadHandling(item.name)
+          //   .then(
+          //     (postHandling) => {
+          //       Logs.writeMessage(`Post download handling done: ${postHandling}`);
+          //       this.moveTorrentForProcessing(torrentHash, item.name);
+          //       this.processTorrentFiles(torrentHash);
+
+          //     }
+          //   )
+          //   .catch((err) => {
+          //     Logs.writeError(`Post download handling failed: ${err}`);
+          //   });
         }
       });
     }
@@ -149,7 +151,7 @@ export class Sync {
   postDownloadHandling(torrentName) {
     return new Promise((resolve, reject) => {
       if (fs.statSync(util.config.props.nodeDownloadFolder + '/' + torrentName).isDirectory()) {
-        this.unrar.HandleFolder(util.config.props.nodeDownloadFolder + '/' + torrentName, (error, finished) => {
+        Unrar.HandleFolder(util.config.props.nodeDownloadFolder + '/' + torrentName, (error, finished) => {
           if (error) {
             reject(error);
           } else {
