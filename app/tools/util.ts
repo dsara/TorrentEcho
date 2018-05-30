@@ -194,7 +194,7 @@ export default class Util {
   }
 
   private tvRegularMatch(fileName) {
-    const seasonMatch = /(s\d{2}e\d{2})((?:\-e\d{2})+|(?:e\d{2})+)/gi;
+    const seasonMatch = /(s\d{2}e\d{2})((?:\-e\d{2})+|(?:e\d{2})+)?/gi;
     return seasonMatch.exec(fileName);
   }
 
