@@ -37,8 +37,8 @@ export class SFTP {
         rootDownloadFolder = rootDownloadFolder + '/';
       }
 
-      Logs.writeMessage(`Wrote lftp mirror command: mirror -c ${this.ftpsInstance.escapeshell(remotePath + '/' + torrentName)}`);
-      this.ftpsInstance.raw(`mirror -c ${remotePath}/${torrentName}`);
+      Logs.writeMessage(`Wrote lftp mirror command: mirror -c "${this.ftpsInstance.escapeshell(remotePath + '/' + torrentName)}"`);
+      this.ftpsInstance.raw(`mirror -c ${this.ftpsInstance.escapeshell(remotePath + '/' + torrentName)}`);
     }
   }
 
