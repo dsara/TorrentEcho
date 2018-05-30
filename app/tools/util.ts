@@ -109,7 +109,7 @@ export default class Util {
     const tvRegularMatch = this.tvRegularMatch(tempName);
     if (tvRegularMatch != null && foundMatch === false) {
       if (tempName.substring(tvRegularMatch.index).match(/sample/gi) == null) {
-        tempName = tempName.substr(0, tvRegularMatch.index) + tvRegularMatch[0].replace(/s/g, 'S').replace(/e/g, 'E');
+        tempName = tempName.substr(0, tvRegularMatch.index) + tvRegularMatch[0].replace(/s/g, 'S').replace(/e/g, 'E').replace(/\-/g, '');
         tempName = this.postCleanUpFileName(tempName);
         foundMatch = true;
       }
@@ -194,7 +194,7 @@ export default class Util {
   }
 
   private tvRegularMatch(fileName) {
-    const seasonMatch = /\b(s\d{2,2}e\d{2,2})(e\d{2,2})*?\b/gi;
+    const seasonMatch = /(s\d{2}e\d{2})((?:\-e\d{2})+|(?:e\d{2})+)/gi;
     return seasonMatch.exec(fileName);
   }
 
