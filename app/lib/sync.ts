@@ -5,6 +5,7 @@ import { Torrent, fileTypes } from './torrent.model';
 import { Unrar } from './unrar';
 import { Logs } from '../tools/logging';
 import utilities from '../tools/util';
+import { DelugeGeneralResult } from './deluge.model';
 const util = utilities.getInstance();
 
 declare var global: {
@@ -115,7 +116,7 @@ export class Sync {
           this.downloadNext();
 
           this.relabelTorrent(torrentHash, item.name, util.config.props.doneLabel)
-            .then((relabled) => {
+            .then((relabled: DelugeGeneralResult) => {
               if (relabled.error) {
                 throw new Error(relabled.error);
               } else {
@@ -130,58 +131,40 @@ export class Sync {
 
           this.moveTorrentForProcessing(torrentHash, item.name);
           this.processTorrentFiles(torrentHash);
-
-          // this.postDownloadHandling(item.name)
-          //   .then(
-          //     (postHandling) => {
-          //       Logs.writeMessage(`Post download handling done: ${postHandling}`);
-          //       this.moveTorrentForProcessing(torrentHash, item.name);
-          //       this.processTorrentFiles(torrentHash);
-
-          //     }
-          //   )
-          //   .catch((err) => {
-          //     Logs.writeError(`Post download handling failed: ${err}`);
-          //   });
         }
       });
     }
   }
 
-  postDownloadHandling(torrentName) {
-    return new Promise((resolve, reject) => {
-      if (fs.statSync(util.config.props.nodeDownloadFolder + '/' + torrentName).isDirectory()) {
-        Unrar.HandleFolder(util.config.props.nodeDownloadFolder + '/' + torrentName, (error, finished) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(finished);
-          }
-        });
-      } else {
-        resolve(true);
-      }
-    });
-  }
-
   relabelTorrent(torrentHash: string, torrentName: string, newLabel: string) {
     Logs.writeMessage(`Relabelling ${torrentName}`);
-    return this.deluge.changeTorrentLabel(torrentHash, newLabel);
+    return this.deluge.changeTorrentLabel(torrentHash, newLabel)
+      .catch(err => {
+        Logs.writeError(`Torrent ${torrentName} failed on relabeling: ${err}`);
+      });
   }
 
   moveTorrentForProcessing(torrentHash: string, torrentName: string) {
-    if (util.doesPathExist(`./${torrentHash}`)) {
-      Logs.writeMessage(`Torrent ${torrentName} already has a folder in location; skipping move.`);
-    } else {
-      util.copyToNewDirectory(`./${torrentName}`, torrentHash);
+    try {
+      if (util.doesPathExist(`./${torrentHash}`)) {
+        Logs.writeMessage(`Torrent ${torrentName} already has a folder in location; skipping move.`);
+      } else {
+        util.copyToNewDirectory(`./${torrentName}`, torrentHash);
+      }
+    } catch (err) {
+      Logs.writeError(`Torrent ${torrentName} failed at move for processing: ${err}`);
     }
   }
 
   processTorrentFiles(torrentHash: string) {
     if (util.doesPathExist(`./${torrentHash}`)) {
-      util.renameTVFiles(`./${torrentHash}`);
-      util.restructureTVFiles(`./${torrentHash}`);
-      util.copyAllToTVDestination(`./${torrentHash}`);
+      try {
+        util.renameTVFiles(`./${torrentHash}`);
+        util.restructureTVFiles(`./${torrentHash}`);
+        util.copyAllToTVDestination(`./${torrentHash}`);
+      } catch (err) {
+        Logs.writeError(`Torrent hash ${torrentHash} has failed in post processing: ${err}`);
+      }
     } else {
       Logs.writeMessage(`Torrent hash ${torrentHash} folder does not exist to be processed`);
     }

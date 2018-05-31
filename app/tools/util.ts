@@ -241,7 +241,7 @@ export default class Util {
           if (fileName.substring(tvDateEpisodeMatch.index).match(/sample/gi) == null) {
             this.createIfMissingDirectory(`${rootPath}/${fileName.substr(0, tvDateEpisodeMatch.index - 1)}`);
             this.createIfMissingDirectory(`${rootPath}/${fileName.substr(0, tvDateEpisodeMatch.index - 1)}/${tvDateEpisodeMatch[0].substr(0, 4)}`);
-            fs.renameSync(sourceItemPath, `${fileName.substr(0, tvDateEpisodeMatch.index - 1)}/${tvDateEpisodeMatch[0].substr(0, 4)}/${fileName}${fileExt}`);
+            fs.renameSync(sourceItemPath, `${rootPath}/${fileName.substr(0, tvDateEpisodeMatch.index - 1)}/${tvDateEpisodeMatch[0].substr(0, 4)}/${fileName}${fileExt}`);
             foundMatch = true;
           }
         }
