@@ -26,15 +26,11 @@ class ConfigProperties {
   pass: string;
   chownUser: number;
   chownGroup: number;
-  isSecure: boolean;
   pget: number;
-  useTemp: boolean;
   rootDownloadFolder: string;
   nodeDownloadFolder: string;
   tvShowsDestination: string;
   labelDownloadFolders: Array<string>;
   doneLabel: string;
   doneLabelDelay: number;
-  verboseLogging: boolean;
-  syncRemoveSource: boolean;
 }
