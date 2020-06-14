@@ -1,4 +1,5 @@
-import * as ftps from 'ftps';
+//import * as ftps from 'ftps';
+import * as ftps from '../tools/ftps';
 import { Logs } from '../tools/logging';
 import utilities from '../tools/util';
 
