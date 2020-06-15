@@ -1,5 +1,5 @@
-//import * as ftps from 'ftps';
-import * as ftps from '../tools/ftps';
+import * as FTP from 'ftps';
+// import { FTP, FtpsConfigOptions } from '../tools/ftps-new';
 import { Logs } from '../tools/logging';
 import utilities from '../tools/util';
 
@@ -17,7 +17,7 @@ export class SFTP {
                          set xfer:temp-file-name *.tmp;
                          set xfer:destination-directory ${util.config.props.rootDownloadFolder}`;
 
-    this.ftpsInstance = new ftps({
+    this.ftpsInstance = new FTP({
       host: util.config.props.host,
       username: util.config.props.user,
       password: util.config.props.pass,
@@ -52,6 +52,9 @@ export class SFTP {
 
   executeCommands(callback: (error, result) => void): void {
     Logs.writeMessage('Executing stored lftp commands');
-    return this.ftpsInstance.exec(callback);
+    let lftpProcess = this.ftpsInstance.exec(callback);
+    lftpProcess.on('close', function (code) {
+      lftpProcess.kill();
+    });
   }
 }

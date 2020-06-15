@@ -96,8 +96,8 @@ FTP.prototype.prepareLFTPOptions = function () {
     opts.push('set ' + this.options.protocol.toLowerCase() + ':auto-confirm yes')
   }
   // Only support SFTP for openSSH key authentication
-  if (this.options.protocol.toLowerCase() === "sftp" && this.options.requireSSHKey) {
-    opts.push('set sftp:connect-program "ssh -a -x -i ' + this.options.sshKeyPath + '"')
+  if(this.options.protocol.toLowerCase() === "sftp" && this.options.requireSSHKey){
+    opts.push('set sftp:connect-program "ssh -a -x -i '+this.options.sshKeyPath+'"')
   }
   opts.push('set net:max-retries ' + this.options.retries)
   opts.push('set net:timeout ' + this.options.timeout)
@@ -163,9 +163,8 @@ FTP.prototype.exec = function (cmds, callback) {
         data: data
       })
     }
-    lftp.kill();
   })
-  return lftp;
+  return lftp
 }
 
 FTP.prototype.execAsStream = function (cmds) {
