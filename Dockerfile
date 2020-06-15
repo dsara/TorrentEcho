@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:10.2.1
+FROM mhart/alpine-node:14
 
 RUN apk add --no-cache bash lftp openssh p7zip
 

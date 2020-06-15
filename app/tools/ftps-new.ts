@@ -126,6 +126,9 @@ export class FTP {
           data: data
         })
       }
+      // setTimeout(() => {
+      //   process.kill(-lftp.pid);
+      // }, 1000);
       // process.kill(-lftp.pid);
       lftp.kill();
     })
