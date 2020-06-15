@@ -1,5 +1,5 @@
-import * as FTP from 'ftps';
-// import { FTP, FtpsConfigOptions } from '../tools/ftps-new';
+// import * as FTP from 'ftps';
+import { FTP, FtpsConfigOptions } from '../tools/ftps-new';
 import { Logs } from '../tools/logging';
 import utilities from '../tools/util';
 
@@ -53,8 +53,8 @@ export class SFTP {
   executeCommands(callback: (error, result) => void): void {
     Logs.writeMessage('Executing stored lftp commands');
     let lftpProcess = this.ftpsInstance.exec(callback);
-    lftpProcess.on('close', function (code) {
-      lftpProcess.kill();
-    });
+    // lftpProcess.on('close', function (code) {
+    //   lftpProcess.kill();
+    // });
   }
 }

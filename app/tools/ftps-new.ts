@@ -91,13 +91,13 @@ export class FTP {
       throw new Error('Callback is missing to exec() function.')
     }
     var cmd = this.prepareLFTPOptions().concat(this.cmds).join(';')
-    var spawnoptions
+    var spawnoptions: any = {
+      deatched: true
+    }
 
     this.cmds = []
     if (this.options.cwd) {
-      spawnoptions = {
-        cwd: this.options.cwd
-      }
+      spawnoptions.cwd = this.options.cwd;
     }
 
     var lftp = spawn('lftp', ['-c', cmd], spawnoptions)
@@ -126,6 +126,7 @@ export class FTP {
           data: data
         })
       }
+      // process.kill(-lftp.pid);
       lftp.kill();
     })
     return lftp;
