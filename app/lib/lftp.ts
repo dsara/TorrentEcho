@@ -18,10 +18,10 @@ export class SFTP {
                          set xfer:destination-directory ${util.config.props.rootDownloadFolder}`;
 
     this.ftpsInstance = new FTP({
-      host: util.config.props.host,
+      host: util.config.props.sshHost,
       username: util.config.props.user,
       password: util.config.props.pass,
-      port: util.config.props.port,
+      port: util.config.props.sshPort,
       retries: 2,
       retryInterval: 10,
       protocol: 'sftp',

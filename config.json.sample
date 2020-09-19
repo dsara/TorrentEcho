@@ -1,10 +1,13 @@
 {
   "mode": "xmlrpc",
-  "host": "subdomain.host.com",
-  "port": 12345,
+  "webHost": "http://sputnik.whatbox.ca:23891",
+  "webPath": "/json"
+  "sshHost": "sputnik.whatbox.ca"
+  "sshPort": "22"
+  "port": 41026,
   "path": "/deluge/json",
-  "user": "username",
-  "pass": "password",
+  "user": "riot419",
+  "pass": "vpD9BOLjcQTp4Kxa",
   "chownUser": 1026,
   "chownGroup": 101,
   "pget": 30,
@@ -13,5 +16,8 @@
   "tvShowsDestination": "/tv",
   "labelDownloadFolders": { "test": "/tv" },
   "doneLabel": "done",
-  "doneLabelDelay": 300
+  "doneLabelDelay": 300,
+  "verboseLogging": true,
+  "syncFolders": {"tv": { "source": "/download", "destination": "/download"}},
+  "syncRemoveSource": true
 }

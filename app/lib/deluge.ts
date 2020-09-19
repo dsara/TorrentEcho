@@ -21,7 +21,7 @@ export class Deluge {
       Accept: 'application/json',
       'Accept-Encoding': 'gzip, deflate, br'
     },
-    host: 'https://' + this.props.host
+    host: this.props.webHost
   });
 
   id = 0;
@@ -30,7 +30,7 @@ export class Deluge {
 
   authenticate(): Promise<DelugeAuthLogin> {
     const options: requestLib.UriOptions & requestLib.CoreOptions = {
-      uri: `https://${this.props.host}${this.props.path}`,
+      uri: `${this.props.webHost}${this.props.webPath}`,
       json: {
         method: methods.login,
         params: [this.props.pass],
@@ -52,7 +52,7 @@ export class Deluge {
   call<T>(method, params): Promise<T> {
     return this.authenticate().then((auth) => {
       const options: requestLib.UriOptions & requestLib.CoreOptions = {
-        uri: `https://${this.props.host}${this.props.path}`,
+        uri: `${this.props.webHost}${this.props.webHost}`,
         json: {
           method: method,
           params: params,
