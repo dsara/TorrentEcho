@@ -52,7 +52,7 @@ export class Deluge {
   call<T>(method, params): Promise<T> {
     return this.authenticate().then((auth) => {
       const options: requestLib.UriOptions & requestLib.CoreOptions = {
-        uri: `${this.props.webHost}${this.props.webHost}`,
+        uri: `${this.props.webHost}${this.props.webPath}`,
         json: {
           method: method,
           params: params,
