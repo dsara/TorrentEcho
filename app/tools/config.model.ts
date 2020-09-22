@@ -19,8 +19,10 @@ export class Config {
 
 class ConfigProperties {
   mode: string;
+  isSecure: boolean;
   webHost: string;
   webPath: string;
+  webPort: number;
   sshHost: string;
   sshPort: string;
   user: string;

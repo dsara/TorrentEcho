@@ -6,6 +6,7 @@ import { Unrar } from './unrar';
 import { Logs } from '../tools/logging';
 import utilities from '../tools/util';
 import { DelugeGeneralResult } from './deluge.model';
+import { RTorrent } from './rtorrent';
 const util = utilities.getInstance();
 
 declare var global: {
@@ -23,38 +24,29 @@ if (!global.isDownloading) {
 
 export class Sync {
   doneLabelDelay = (util.config.props.doneLabelDelay || 0) * 1000;
-  deluge: Deluge = new Deluge();
+  // deluge: Deluge = new Deluge();
+  rtorrent: RTorrent = new RTorrent();
   sftp: SFTP = new SFTP();
 
   constructor() {}
 
-  getTorrentCount(torrents: Object) {
-    let count = 0;
-    for (const tor in torrents) {
-      if (torrents.hasOwnProperty(tor)) {
-        ++count;
-      }
-    }
-    return count;
-  }
-
   sync(label: string, location: string, doneLabel: string, callback: Function) {
     Logs.writeMessage('Getting Torrents');
 
-    this.deluge.getTorrents(label).then(
+    this.rtorrent.getTorrents(label).then(
       (data) => {
-        if (data && data.error === null && data.result.torrents) {
-          const allTorrents = data.result.torrents;
-          Logs.writeMessage(`${this.getTorrentCount(allTorrents)} torrents with label ${label}`, callback);
+        if (data.length > 0) {
+          const allTorrents = data;
+          Logs.writeMessage(`${allTorrents.length} torrents with label ${label}`, callback);
           for (const torrent in allTorrents) {
             if (torrent in global.torrents) {
               Logs.writeMessage(`${global.torrents[torrent].name} already being handled by another call. Skipping`, callback);
             } else {
               global.torrents[torrent] = new Torrent(
-                allTorrents[torrent].progress === 100,
-                this.isRemoteTorrentADirectory(allTorrents[torrent].name),
-                allTorrents[torrent].name,
-                allTorrents[torrent].save_path,
+                allTorrents[torrent].complete,
+                allTorrents[torrent].isMultiFile,
+                allTorrents[torrent].torrentName,
+                allTorrents[torrent].path,
                 util.config.props.rootDownloadFolder
               );
 
@@ -62,13 +54,15 @@ export class Sync {
                 Logs.writeMessage(`${global.torrents[torrent].name} incomplete, waiting for torrent to complete`, callback);
                 this.checkTorrentComplete(torrent);
               } else {
-                Logs.writeMessage(`Torrent ready, adding ${allTorrents[torrent].name} to download`, callback);
+                Logs.writeMessage(`Torrent ready, adding ${allTorrents[torrent].torrentName} to download`, callback);
               }
             }
           }
 
           Logs.writeMessage(`Starting Possible Download(s)`, callback, true);
           this.downloadNext();
+        } else {
+          Logs.writeMessage(`No torrents match`, callback, true);
         }
       },
       (error) => {
@@ -116,13 +110,9 @@ export class Sync {
           this.downloadNext();
 
           this.relabelTorrent(torrentHash, item.name, util.config.props.doneLabel)
-            .then((relabled: DelugeGeneralResult) => {
-              if (relabled.error) {
-                throw new Error(relabled.error);
-              } else {
-                Logs.writeMessage(`${item.name} label changed to ${util.config.props.doneLabel}`);
-                delete global.torrents[torrentHash];
-              }
+            .then((relabled: boolean) => {
+              Logs.writeMessage(`${item.name} label changed to ${util.config.props.doneLabel}`);
+              delete global.torrents[torrentHash];
             })
             .catch((err) => {
               Logs.writeError(`Re-label failed: ${err}`);
@@ -138,7 +128,7 @@ export class Sync {
 
   relabelTorrent(torrentHash: string, torrentName: string, newLabel: string) {
     Logs.writeMessage(`Relabelling ${torrentName}`);
-    return this.deluge.changeTorrentLabel(torrentHash, newLabel)
+    return this.rtorrent.changeTorrentLabel(torrentHash, newLabel)
       .catch(err => {
         Logs.writeError(`Torrent ${torrentName} failed on relabeling: ${err}`);
       });
@@ -182,21 +172,18 @@ export class Sync {
   }
 
   checkTorrentComplete(hash) {
-    this.deluge.getSingleTorrent(hash).then(
-      (data) => {
-        if (data && data.result) {
-          const currentTorrent = data.result;
-          if (currentTorrent.progress === 100) {
-            Logs.writeMessage(`${currentTorrent.name} now ready for download; addding to queue.`);
-            global.torrents[hash].shouldDownload = true;
+    this.rtorrent.isTorrentDone(hash).then(
+      (isComplete) => {
+        if (isComplete) {
+          Logs.writeMessage(`${hash} now ready for download; addding to queue.`);
+          global.torrents[hash].shouldDownload = true;
 
-            this.downloadNext();
-          } else {
-            Logs.writeMessage(`${currentTorrent.name} still not ready, checking again in 15 seconds.`);
-            setTimeout(() => {
-              this.checkTorrentComplete(hash);
-            }, 15000);
-          }
+          this.downloadNext();
+        } else {
+          Logs.writeMessage(`${hash} still not ready, checking again in 15 seconds.`);
+          setTimeout(() => {
+            this.checkTorrentComplete(hash);
+          }, 15000);
         }
       },
       (error) => {

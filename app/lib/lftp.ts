@@ -38,15 +38,15 @@ export class SFTP {
         rootDownloadFolder = rootDownloadFolder + '/';
       }
 
-      Logs.writeMessage(`Wrote lftp mirror command: mirror -c "${this.ftpsInstance.escapeshell(remotePath + '/' + torrentName)}"`);
-      this.ftpsInstance.raw(`mirror -c ${this.ftpsInstance.escapeshell(remotePath + '/' + torrentName)}`);
+      Logs.writeMessage(`Wrote lftp mirror command: mirror -c "${this.ftpsInstance.escapeshell(remotePath)}"`);
+      this.ftpsInstance.raw(`mirror -c ${this.ftpsInstance.escapeshell(remotePath)}`);
     }
   }
 
   addPGetCommand(remotePath: string, torrentName: string): void {
     if (remotePath && torrentName) {
-      Logs.writeMessage(`Wrote lftp pget command: pget -c ${this.ftpsInstance.escapeshell(remotePath + '/' + torrentName)}`);
-      this.ftpsInstance.raw(`pget -c ${this.ftpsInstance.escapeshell(remotePath + '/' + torrentName)}`);
+      Logs.writeMessage(`Wrote lftp pget command: pget -c ${this.ftpsInstance.escapeshell(remotePath)}`);
+      this.ftpsInstance.raw(`pget -c ${this.ftpsInstance.escapeshell(remotePath)}`);
     }
   }
 
