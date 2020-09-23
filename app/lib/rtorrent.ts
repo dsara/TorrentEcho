@@ -85,7 +85,7 @@ export class RTorrent {
           reject('method call failure');
         } else {
           value.filter((torrent, index) => {
-            return torrent[2] === label && torrent[4] === '1';
+            return torrent[2] === label;
           }).forEach(filteredTorrent => {
             results.push({
               hash: filteredTorrent[0],

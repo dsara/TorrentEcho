@@ -7,6 +7,7 @@ import { Logs } from '../tools/logging';
 import utilities from '../tools/util';
 import { DelugeGeneralResult } from './deluge.model';
 import { RTorrent } from './rtorrent';
+import { RTorrentData } from '../tools/rtorrent.model';
 const util = utilities.getInstance();
 
 declare var global: {
@@ -38,23 +39,23 @@ export class Sync {
         if (data.length > 0) {
           const allTorrents = data;
           Logs.writeMessage(`${allTorrents.length} torrents with label ${label}`, callback);
-          for (const torrent in allTorrents) {
-            if (torrent in global.torrents) {
-              Logs.writeMessage(`${global.torrents[torrent].name} already being handled by another call. Skipping`, callback);
+          for (const torrent of allTorrents) {
+            if (torrent.hash in global.torrents) {
+              Logs.writeMessage(`${global.torrents[torrent.hash].name} already being handled by another call. Skipping`, callback);
             } else {
-              global.torrents[torrent] = new Torrent(
-                allTorrents[torrent].complete,
-                allTorrents[torrent].isMultiFile,
-                allTorrents[torrent].torrentName,
-                allTorrents[torrent].path,
+              global.torrents[torrent.hash] = new Torrent(
+                torrent.complete,
+                torrent.isMultiFile,
+                torrent.torrentName,
+                torrent.path,
                 util.config.props.rootDownloadFolder
               );
 
-              if (!global.torrents[torrent].shouldDownload) {
-                Logs.writeMessage(`${global.torrents[torrent].name} incomplete, waiting for torrent to complete`, callback);
+              if (!global.torrents[torrent.hash].shouldDownload) {
+                Logs.writeMessage(`${global.torrents[torrent.hash].name} incomplete, waiting for torrent to complete`, callback);
                 this.checkTorrentComplete(torrent);
               } else {
-                Logs.writeMessage(`Torrent ready, adding ${allTorrents[torrent].torrentName} to download`, callback);
+                Logs.writeMessage(`Torrent ready, adding ${torrent.torrentName} to download`, callback);
               }
             }
           }
@@ -127,7 +128,7 @@ export class Sync {
   }
 
   relabelTorrent(torrentHash: string, torrentName: string, newLabel: string) {
-    Logs.writeMessage(`Relabelling ${torrentName}`);
+    Logs.writeMessage(`Relabelling ${torrentName} with hash ${torrentHash} and new label of ${newLabel}`);
     return this.rtorrent.changeTorrentLabel(torrentHash, newLabel)
       .catch(err => {
         Logs.writeError(`Torrent ${torrentName} failed on relabeling: ${err}`);
@@ -171,18 +172,18 @@ export class Sync {
     }
   }
 
-  checkTorrentComplete(hash) {
-    this.rtorrent.isTorrentDone(hash).then(
+  checkTorrentComplete(torrent: RTorrentData) {
+    this.rtorrent.isTorrentDone(torrent.hash).then(
       (isComplete) => {
         if (isComplete) {
-          Logs.writeMessage(`${hash} now ready for download; addding to queue.`);
-          global.torrents[hash].shouldDownload = true;
+          Logs.writeMessage(`${torrent.torrentName} now ready for download; addding to queue.`);
+          global.torrents[torrent.hash].shouldDownload = true;
 
           this.downloadNext();
         } else {
-          Logs.writeMessage(`${hash} still not ready, checking again in 15 seconds.`);
+          Logs.writeMessage(`${torrent.torrentName} still not ready, checking again in 15 seconds.`);
           setTimeout(() => {
-            this.checkTorrentComplete(hash);
+            this.checkTorrentComplete(torrent);
           }, 15000);
         }
       },
